@@ -20,7 +20,7 @@ class _LoginState extends State<Login> {
 
   final ApiService _apiService = ApiService();
 
-  Future<void> _realizarLogin() async {
+  Future _realizarLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -33,16 +33,13 @@ class _LoginState extends State<Login> {
         );
         if (user != null) {
           print('Login efetuado com sucesso!');
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => BlackTeste()),
-            (Route<dynamic> route) => false,
-          );
         } else {
           print('Erro ao realizar login');
         }
-      } catch (e) {
-        print('Erro ao realizar login: $e');
+      } on Exception catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       } finally {
         setState(() {
           _isLoading = false;
