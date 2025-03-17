@@ -1,49 +1,65 @@
-import 'package:flutter_application_1/features/login/components/cpf_field.dart';
-import 'package:flutter_application_1/features/login/components/dropdwn_button.dart';
-import 'package:flutter_application_1/features/login/components/senha_field.dart';
-import 'package:flutter_application_1/features/login/auth_services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/screens/black_teste.dart';
+import 'package:flutter_application_1/features/login/auth_services/api_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+// Importando os componentes
+import '/features/login/components/cpf_field.dart';
+import '/features/login/components/senha_field.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Login> createState() => _LoginScreenState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginScreenState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
   final _cpfController = TextEditingController();
   final _senhaController = TextEditingController();
+  final _apiService = ApiService();
+  final _storage = const FlutterSecureStorage();
+
   bool _isLoading = false;
+  String? _errorMessage;
 
-  final ApiService _apiService = ApiService();
+  @override
+  void dispose() {
+    _cpfController.dispose();
+    _senhaController.dispose();
+    super.dispose();
+  }
 
-  Future _realizarLogin() async {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
+        _errorMessage = null;
       });
 
       try {
-        final user = await _apiService.login(
+        final response = await _apiService.login(
           _cpfController.text,
           _senhaController.text,
         );
-        if (user != null) {
-          print('Login efetuado com sucesso!');
-        } else {
-          print('Erro ao realizar login');
+
+        // Armazenar o token de forma segura
+        await _storage.write(key: 'auth_token', value: response['token']);
+
+        // Navegar para a tela principal após login bem-sucedido
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed('/home');
         }
-      } on Exception catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
-      } finally {
+      } catch (e) {
         setState(() {
-          _isLoading = false;
+          _errorMessage = e.toString();
         });
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -51,28 +67,66 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+        child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CpfField(controller: _cpfController),
-                SizedBox(height: 10), // Adicionei espaço entre os campos
-                SenhaField(controller: _senhaController),
-                SizedBox(height: 10), // Adicionei espaço entre os campos
-                MyDropdwnButton(),
-                SizedBox(height: 20.0),
-                _isLoading
-                    ? CircularProgressIndicator()
-                    : ElevatedButton(
-                      onPressed: _realizarLogin,
-                      child: Text('Login'),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Logo ou imagem
+                  Image.asset(
+                    'assets/image/alfaid.png',
+                    width: 250,
+                    height: 1000,
+                  ),
+                  // const Icon(
+                  //   Icons.account_circle,
+                  //   size: 100,
+                  //   color: Colors.blue,
+                  // ),
+                  const SizedBox(height: 32),
+
+                  // Campo de CPF
+                  CpfField(controller: _cpfController),
+                  const SizedBox(height: 16),
+
+                  // Campo de Senha
+                  SenhaField(controller: _senhaController),
+                  const SizedBox(height: 24),
+
+                  // Mensagem de erro
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-              ],
+
+                  // Botão de Login
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: TextStyle(fontSize: 16),
+                      backgroundColor: Color(0xFF),
+                    ),
+                    child:
+                        _isLoading
+                            ? const CircularProgressIndicator()
+                            : const Text('ENTRAR'),
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         ),

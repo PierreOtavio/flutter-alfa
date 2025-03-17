@@ -37,7 +37,7 @@ dependencies:
     dio: ^5.8.0+1
     http: ^0.13.3
     provider: ^6.0.0
-    # flutter_secure_storage: ^5.0.2
+    flutter_secure_storage: ^5.0.2
     dropdown_button2: ^2.3.9
 
 dev_dependencies:
@@ -62,7 +62,7 @@ flutter:
     uses-material-design: true
 
     assets:
-        - C:\Users\perre\OneDrive\Documentos\GitHub\flutter-alfa\flutter_application_1\assets\image\alfaid.png
+        - assets/image/alfaid.png
 
     # To add assets to your application, add an assets section, like this:
     # assets:

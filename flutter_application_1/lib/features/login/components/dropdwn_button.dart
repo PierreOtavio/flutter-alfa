@@ -39,7 +39,7 @@ class _MyDropdwnButton extends State {
         buttonStyleData: const ButtonStyleData(
           padding: EdgeInsets.symmetric(horizontal: 16),
           height: 40,
-          width: 140,
+          width: 1240,
         ),
         menuItemStyleData: const MenuItemStyleData(height: 40),
       ),
