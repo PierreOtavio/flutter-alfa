@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // Importando os componentes
 import '/features/login/components/cpf_field.dart';
 import '/features/login/components/senha_field.dart';
+import '/features/login/components/dropdwn_button.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -68,6 +69,7 @@ class _LoginScreenState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
+      backgroundColor: Color(0xFF303030),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -79,10 +81,10 @@ class _LoginScreenState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo ou imagem
-                  Image.asset(
-                    'assets/image/alfaid.png',
-                    width: 250,
-                    height: 1000,
+                  Container(
+                    child: Image.asset('assets/image/alfaid.png', width: 200),
+
+                    decoration: BoxDecoration(color: Color(0xFF08416C)),
                   ),
                   // const Icon(
                   //   Icons.account_circle,
@@ -110,13 +112,16 @@ class _LoginScreenState extends State<Login> {
                       ),
                     ),
 
+                  MyDropdownButton(),
+                  const SizedBox(height: 24),
+
                   // Botão de Login
                   ElevatedButton(
                     onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       textStyle: TextStyle(fontSize: 16),
-                      backgroundColor: Color(0xFF),
+                      backgroundColor: Color(0xFF08416C),
                     ),
                     child:
                         _isLoading

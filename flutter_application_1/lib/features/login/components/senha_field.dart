@@ -18,17 +18,22 @@ class _SenhaFieldState extends State<SenhaField> {
       controller: widget.controller,
       obscureText: !_passwordvisible,
       decoration: InputDecoration(
+        prefixIcon: Icon(Icons.lock, color: Color(0xFFC5C8D1)),
         labelText: "Senha",
+        labelStyle: TextStyle(color: Color(0xFFC5C8D1)),
         suffixIcon: IconButton(
           icon: Icon(
             _passwordvisible ? Icons.visibility : Icons.visibility_off,
-            color: Theme.of(context).primaryColorDark,
+            color: Color(0xFFC5C8D1),
           ),
           onPressed: () {
             setState(() {
               _passwordvisible = !_passwordvisible;
             });
           },
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
       ),
       validator: (value) {

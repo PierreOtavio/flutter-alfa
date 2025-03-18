@@ -9,7 +9,14 @@ class CpfField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      decoration: const InputDecoration(labelText: "CPF"),
+      decoration: const InputDecoration(
+        labelText: "CPF",
+        prefixIcon: Icon(Icons.person, color: Color(0xFFC7C7CF)),
+        labelStyle: TextStyle(color: Color(0xFFC7C7CF)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+      ),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return "Por favor, insira o seu CPF";
