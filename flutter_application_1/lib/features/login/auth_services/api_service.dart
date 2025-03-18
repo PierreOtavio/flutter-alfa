@@ -15,13 +15,12 @@ class ApiService {
   Future<Map<String, dynamic>> realizeLogin(String cpf, String senha) async {
     try {
       final url = Uri.parse('$baseUrl/login');
-      final response = await http
-          .post(
-            url,
-            headers: {'Content-Type': 'application/json; charset=UTF-8'},
-            body: jsonEncode({'cpf': cpf, 'senha': senha}),
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({'cpf': cpf, 'senha': senha}),
+      );
+      //.timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
