@@ -1,16 +1,15 @@
 class NetworkException implements Exception {
   final String message;
-
   NetworkException(this.message);
 
   @override
   String toString() => message;
 }
 
-class SocketException implements Exception {
-  SocketException(String message) : super();
+class SocketException extends NetworkException {
+  SocketException(String message) : super(message);
 }
 
-class TimeoutException implements Exception {
-  TimeoutException(String message) : super();
+class TimeoutException extends NetworkException {
+  TimeoutException(String message) : super(message);
 }

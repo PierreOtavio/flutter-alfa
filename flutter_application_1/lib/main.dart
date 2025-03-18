@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter TESTE',
       theme: ThemeData(primaryColor: Color(0xFF303030)),
-      home: Login(),
+      home: const Login(),
     );
   }
 }

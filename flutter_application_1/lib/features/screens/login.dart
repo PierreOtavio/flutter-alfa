@@ -1,5 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/login/auth_services/api_service.dart';
+import 'package:flutter_application_1/features/login/auth_services/auth_excp.dart';
+import 'package:flutter_application_1/features/login/auth_services/network_excp.dart';
+import 'package:flutter_application_1/features/screens/black_teste.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Importando os componentes
@@ -17,7 +22,7 @@ class Login extends StatefulWidget {
 class _LoginScreenState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
   final _cpfController = TextEditingController();
-  final _senhaController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _apiService = ApiService();
   final _storage = const FlutterSecureStorage();
 
@@ -27,11 +32,11 @@ class _LoginScreenState extends State<Login> {
   @override
   void dispose() {
     _cpfController.dispose();
-    _senhaController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -39,22 +44,41 @@ class _LoginScreenState extends State<Login> {
       });
 
       try {
-        final response = await _apiService.login(
+        final response = await _apiService.realizeLogin(
           _cpfController.text,
-          _senhaController.text,
+          _passwordController.text,
         );
 
-        // Armazenar o token de forma segura
-        await _storage.write(key: 'auth_token', value: response['token']);
+        final token = response['token'];
+        await _storage.write(key: 'auth_token', value: token);
 
-        // Navegar para a tela principal após login bem-sucedido
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+        // Verificar se o token é válido
+        final tokenValido = await _apiService.verificarToken(token);
+
+        if (!tokenValido) {
+          throw AuthException('Token inválido');
         }
-      } catch (e) {
+
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const BlackTeste()),
+          );
+        }
+      } on AuthException catch (e) {
         setState(() {
           _errorMessage = e.toString();
         });
+        log('Erro de autenticação: ${e.toString()}');
+      } on NetworkException catch (e) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+        log('Erro de rede: ${e.toString()}');
+      } catch (e) {
+        setState(() {
+          _errorMessage = 'Erro inesperado: $e';
+        });
+        log('Erro inesperado: $e');
       } finally {
         if (mounted) {
           setState(() {
@@ -98,10 +122,13 @@ class _LoginScreenState extends State<Login> {
                   const SizedBox(height: 16),
 
                   // Campo de Senha
-                  SenhaField(controller: _senhaController),
+                  SenhaField(controller: _passwordController),
                   const SizedBox(height: 24),
 
                   // Mensagem de erro
+                  MyDropdownButton(),
+                  const SizedBox(height: 24),
+
                   if (_errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
@@ -111,22 +138,24 @@ class _LoginScreenState extends State<Login> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-
-                  MyDropdownButton(),
-                  const SizedBox(height: 24),
-
                   // Botão de Login
                   ElevatedButton(
                     onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      textStyle: TextStyle(fontSize: 16),
+                      textStyle: TextStyle(fontSize: 16, color: Colors.white),
                       backgroundColor: Color(0xFF08416C),
                     ),
                     child:
                         _isLoading
                             ? const CircularProgressIndicator()
-                            : const Text('ENTRAR'),
+                            : const Text(
+                              'ENTRAR',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
                   ),
 
                   const SizedBox(height: 16),

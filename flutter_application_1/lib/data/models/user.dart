@@ -2,7 +2,7 @@ class User {
   final int id;
   final String nome;
   final String cpf;
-  final String senha;
+  final String password;
   final String email;
   final String telefone;
 
@@ -10,7 +10,7 @@ class User {
     required this.id,
     required this.nome,
     required this.email,
-    required this.senha,
+    required this.password,
     required this.cpf,
     required this.telefone,
   });
@@ -20,7 +20,7 @@ class User {
       id: json['id'],
       nome: json['nome'],
       email: json['email'],
-      senha: json['senha'],
+      password: json['password'],
       cpf: json['cpf'],
       telefone: json['telefone'],
     );
