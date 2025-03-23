@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -12,15 +12,14 @@ class _InicioPageState extends State<InicioPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Color(0xFF303030)),
       backgroundColor: Color(0xFF303030),
       body: Column(
         children: [
           SizedBox(height: 20),
           Container(
-            width: 300,
+            width: 500,
             alignment: Alignment.center,
-            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
             decoration: BoxDecoration(
               color: Color(0xFF424242),
               borderRadius: BorderRadius.circular(12),
