@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/login_page.dart';
+import 'package:flutter_application_2/notify_page.dart';
 import 'package:flutter_application_2/veicsoli_page.dart';
 import 'package:flutter_application_2/veiculo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +35,13 @@ class _InicioPageState extends State<InicioPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => VeicsoliPage()),
+    );
+  }
+
+  Future<void> redirectNotify() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => NotifyPage()),
     );
   }
 
@@ -195,8 +203,64 @@ class _InicioPageState extends State<InicioPage> {
               ),
             ),
           ),
+
+          Column(
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  redirectNotify();
+                },
+                backgroundColor:
+                    Colors.transparent, // Fundo transparente do FAB
+                elevation: 0,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Fundo do botão
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A2E), // Cor de fundo do botão
+                        borderRadius: BorderRadius.circular(
+                          16,
+                        ), // Bordas arredondadas
+                      ),
+                    ),
+                    // Ícone de sino
+                    const Icon(
+                      Icons.notifications,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                    // Alerta no canto superior esquerdo
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.red, // Cor do alerta
+                          shape: BoxShape.circle, // Formato circular
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.error,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
