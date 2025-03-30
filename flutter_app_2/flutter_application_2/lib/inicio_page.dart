@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/login_page.dart';
+import 'package:flutter_application_2/veicsoli_page.dart';
 import 'package:flutter_application_2/veiculo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_2/goals/globals.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -28,6 +30,13 @@ class _InicioPageState extends State<InicioPage> {
     );
   }
 
+  Future<void> redirectSolic() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => VeicsoliPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +45,7 @@ class _InicioPageState extends State<InicioPage> {
         children: [
           SizedBox(height: 20),
           Container(
-            width: 500,
+            width: 330,
             alignment: Alignment.center,
             margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
             decoration: BoxDecoration(
@@ -48,7 +57,7 @@ class _InicioPageState extends State<InicioPage> {
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 5),
                   width: 100,
-                  height: 70,
+                  height: 80,
                   decoration: BoxDecoration(
                     color: Color(0xFF424242),
                     borderRadius: BorderRadius.circular(8),
@@ -68,22 +77,23 @@ class _InicioPageState extends State<InicioPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'oi',
+                      instance!.name,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 5),
+
                     Text(
-                      'sla',
-                      style: TextStyle(color: Colors.white, fontSize: 17),
+                      instance!.status,
+                      style: TextStyle(color: Colors.white, fontSize: 19),
                     ),
                   ],
                 ),
 
-                SizedBox(width: 136),
+                SizedBox(width: 40),
                 IconButton(
                   onPressed: () => logout(context),
                   icon: Icon(Icons.logout, color: Colors.white),
@@ -93,29 +103,97 @@ class _InicioPageState extends State<InicioPage> {
           ),
 
           SizedBox(height: 30),
-          Container(
-            alignment: Alignment.centerRight,
-            width: 330,
-            height: 70,
-            margin: EdgeInsets.symmetric(horizontal: 5),
-            decoration: BoxDecoration(
-              color: Color(0xFF424242),
-              borderRadius: BorderRadius.circular(12),
-            ),
 
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () => redirectForVeic(),
-                  icon: Icon(
-                    Icons.car_rental,
-                    color: Color(0xFFFFFFFF),
-                    size: 40,
+          GestureDetector(
+            onTap: () {
+              redirectForVeic();
+            },
+            child: Container(
+              alignment: Alignment.centerRight,
+              width: 330,
+              height: 80,
+              margin: EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                color: Color(0xFF424242),
+                borderRadius: BorderRadius.circular(12),
+              ),
+
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () => redirectForVeic(),
+                    icon: Icon(
+                      Icons.car_rental,
+                      color: Color(0xFFFFFFFF),
+                      size: 40,
+                    ),
                   ),
-                ),
-              ],
+
+                  SizedBox(width: 0),
+
+                  Expanded(
+                    child: Column(
+                      // verticalDirection: VerticalDirection.down,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+
+                      children: [
+                        Text(
+                          'Solicitar um Veículo',
+                          style: TextStyle(color: Colors.white, fontSize: 25),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            // child: IconButton(onPressed: , icon: Icons.car_rental,),
+          ),
+          SizedBox(height: 20),
+          GestureDetector(
+            onTap: () => redirectSolic(),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 5),
+              width: 330,
+              height: 80,
+              alignment: Alignment.centerRight,
+              decoration: BoxDecoration(
+                color: Color(0xFF424242),
+                borderRadius: BorderRadius.circular(12),
+              ),
+
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () => redirectSolic(),
+                    icon: Icon(
+                      Icons.call_merge_rounded,
+                      color: Color(0xFFFFFFFF),
+                      size: 40,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      // verticalDirection: VerticalDirection.down,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+
+                      children: [
+                        Text(
+                          'Veículos Solicitados',
+                          style: TextStyle(color: Colors.white, fontSize: 25),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/data/user.dart';
+import 'package:flutter_application_2/goals/globals.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +42,23 @@ class _LoginPageState extends State<LoginPage> {
         print('Resposta: ${response.body}');
 
         final data = jsonDecode(response.body);
+
+        final userData = data['user'];
+
+        instance = User(
+          id: userData['id'],
+          cpf: userData['cpf'],
+          name: userData['name'],
+          password: userData['password'],
+          email: userData['email'],
+          telefone: userData['telefone'],
+          status: userData['status'],
+          // cargoId: data['cargo_id'],
+        );
+
+        print(instance);
+
+        // print(instance);
 
         // Verifique se a chave token existe
         if (data.containsKey('token')) {

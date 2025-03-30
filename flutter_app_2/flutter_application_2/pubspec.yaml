@@ -39,6 +39,8 @@ dependencies:
     provider: ^6.0.0
     # flutter_secure_storage: ^5.0.2
     dropdown_button2: ^2.3.9
+    sqflite: ^2.0.0+4
+    path: ^1.8.3
 
 dev_dependencies:
     flutter_test:
