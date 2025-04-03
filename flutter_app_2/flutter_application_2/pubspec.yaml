@@ -41,6 +41,7 @@ dependencies:
     dropdown_button2: ^2.3.9
     sqflite: ^2.0.0+4
     path: ^1.8.3
+    flutter_barcode_scanner: ^2.0.0
 
 dev_dependencies:
     flutter_test:
