@@ -5,6 +5,7 @@ import 'package:flutter_application_2/veicsoli_page.dart';
 import 'package:flutter_application_2/veiculo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/goals/globals.dart';
+import 'package:flutter_application_2/veiculo_page.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
