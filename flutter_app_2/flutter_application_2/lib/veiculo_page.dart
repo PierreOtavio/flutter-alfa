@@ -2,10 +2,10 @@ import 'dart:convert';
 import "package:flutter/material.dart";
 import 'package:flutter_application_2/data/veiculo.dart';
 import 'package:flutter_application_2/inicio_page.dart';
+import 'package:flutter_application_2/veicsoli_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_2/goals/globals.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:flutter/services.dart';
 
 class VeiculoPage extends StatefulWidget {
   const VeiculoPage({super.key});
@@ -17,7 +17,6 @@ class _VeiculoPageState extends State<VeiculoPage> {
   bool isLoading = false;
   List<Map<String, dynamic>> veiculos = [];
   List<Map<String, dynamic>> veiculosFiltrados = [];
-  String resultadoQR = "";
 
   @override
   void initState() {
@@ -25,72 +24,86 @@ class _VeiculoPageState extends State<VeiculoPage> {
     buscarVeiculo();
   }
 
-  // Método para ler QR Code
-  Future<void> lerQRCode() async {
-    String barcodeScanRes;
-
-    try {
-      // Chamando o scanner com os parâmetros:
-      // - "#FF013A65" (cor da linha de escaneamento - azul da sua interface)
-      // - "Cancelar" (texto do botão de cancelar)
-      // - true (mostrar botão de flash)
-      // - ScanMode.QR (modo de escaneamento: apenas QR code)
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        "#FF013A65",
-        "Cancelar",
-        true,
-        ScanMode.QR,
-      );
-
-      // Se o usuário cancelar, retorna "-1"
-      if (barcodeScanRes != "-1") {
-        setState(() {
-          resultadoQR = barcodeScanRes;
-        });
-
-        // Aqui você pode implementar a lógica para buscar o veículo pelo QR Code
-        buscarVeiculoPorQRCode(barcodeScanRes);
-      }
-    } on PlatformException {
-      setState(() {
-        resultadoQR = "Erro ao escanear QR code";
-      });
-    }
+  Future<void> redirectSolic() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => VeicsoliPage()),
+    );
   }
+
+  // Método para ler QR Code
+  Future<void> readQR() async 
+  {
+    
+    
+  }
+
+
+  // Future<void> lerQRCode() async {
+  //   String barcodeScanRes;
+
+  //   try {
+  //     // Chamando o scanner com os parâmetros:
+  //     // - "#FF013A65" (cor da linha de escaneamento - azul da sua interface)
+  //     // - "Cancelar" (texto do botão de cancelar)
+  //     // - true (mostrar botão de flash)
+  //     // - ScanMode.QR (modo de escaneamento: apenas QR code)
+  //     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+  //       "#FF013A65",
+  //       "Cancelar",
+  //       true,
+  //       ScanMode.QR,
+  //     );
+
+  //     // Se o usuário cancelar, retorna "-1"
+  //     if (barcodeScanRes != "-1") {
+  //       setState(() {
+  //         resultadoQR = barcodeScanRes;
+  //       });
+
+  //       // Aqui você pode implementar a lógica para buscar o veículo pelo QR Code
+  //       buscarVeiculoPorQRCode(barcodeScanRes);
+  //     }
+  //   } on PlatformException {
+  //     setState(() {
+  //       resultadoQR = "Erro ao escanear QR code";
+  //     });
+  //   }
+  // }
 
   // Método para buscar veículo pelo QR Code
-  Future<void> buscarVeiculoPorQRCode(String qrCode) async {
-    setState(() {
-      isLoading = true;
-    });
+  // Future<void> buscarVeiculoPorQRCode(String qrCode) async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
 
-    try {
-      // Você pode implementar a lógica específica para buscar na API pelo QR Code
-      // Por exemplo:
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/veiculos/qrcode/$qrCode'),
-      );
+  //   try {
+  //     // Você pode implementar a lógica específica para buscar na API pelo QR Code
+  //     // Por exemplo:
+  //     final response = await http.get(
+  //       Uri.parse('http://127.0.0.1:8000/api/veiculos/qrcode/$qrCode'),
+  //     );
 
-      if (response.statusCode == 200) {
-        // Processa o resultado
-        Map<String, dynamic> veiculo = jsonDecode(response.body);
+  //     if (response.statusCode == 200) {
+  //       // Processa o resultado
+  //       Map<String, dynamic> veiculo = jsonDecode(response.body);
 
-        // Mostra um snackbar com o resultado
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Veículo encontrado: ${veiculo['nome']}')),
-        );
-      }
-    } catch (e) {
-      print("Erro ao buscar veículo por QR Code: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Veículo não encontrado')));
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  //       // Mostra um snackbar com o resultado
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Veículo encontrado: ${veiculo['nome']}')),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("Erro ao buscar veículo por QR Code: $e");
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(SnackBar(content: Text('Veículo não encontrado')));
+  //   } finally {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   Future<void> buscarVeiculo() async {
     try {
@@ -105,6 +118,8 @@ class _VeiculoPageState extends State<VeiculoPage> {
       if (response.statusCode == 200) {
         print('Resposta: ${response.body}');
         List<dynamic> vehicles = jsonDecode(response.body);
+
+        
 
         List<Map<String, dynamic>> availableVehicles =
             vehicles
@@ -256,7 +271,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
             // Botão para leitura de QR Code
             SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: lerQRCode, // Conecta ao método de leitura de QR Code
+              onPressed: , // Conecta ao método de leitura de QR Code
               icon: Icon(Icons.camera_alt, color: Colors.white),
               label: Text(
                 "Leia um QR Code",

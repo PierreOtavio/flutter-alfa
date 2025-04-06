@@ -25,20 +25,20 @@ class Veiculo {
     required this.kmRevisao,
   });
 
-  // factory Veiculo.fromJson(Map<String, dynamic> json) {
-  //   return Veiculo(
-  //     id: ,
-  //     placa: ,
-  //     chassi: ,
-  //     status: ,
-  //     qrCode: ,
-  //     ano: ,
-  //     cor: ,
-  //     capacidade: ,
-  //     obsUser: ,
-  //     kmRevisao: ,
-  //   );
-  // }
+  factory Veiculo.fromJson(Map<String, dynamic> json) {
+    return Veiculo(
+      id: json['id'],
+      placa: json['placa'],
+      chassi: json['chassi'],
+      status: json['status'],
+      qrCode: json['qrCode'],
+      ano: json['ano'],
+      cor: json['cor'],
+      capacidade: json['capacidade'],
+      obsUser: json['obsUser'],
+      kmRevisao: json['kmRevisao'],
+    );
+  }
 
   // Map<String, dynamic> toJson()
   // {
