@@ -235,22 +235,48 @@ class _InicioPageState extends State<InicioPage> {
                       size: 32,
                     ),
                     // Alerta no canto superior esquerdo
+                    // Botão de notificação fixo no canto inferior direito
                     Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Colors.red, // Cor do alerta
-                          shape: BoxShape.circle, // Formato circular
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.error,
-                            color: Colors.white,
-                            size: 14,
-                          ),
+                      bottom: 16,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: () => redirectNotify(),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A1A2E),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.notifications,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                            Positioned(
+                              top: 8,
+                              left: 8,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.error,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
