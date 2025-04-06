@@ -32,10 +32,10 @@ class _InicioPageState extends State<InicioPage> {
     );
   }
 
-  Future<void> redirectSolic() async {
+  Future<void> redirectSolic(veiculo) async {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => VeicsoliPage()),
+      MaterialPageRoute(builder: (context) => VeicsoliPage(veiculo: veiculo)),
     );
   }
 
@@ -162,7 +162,7 @@ class _InicioPageState extends State<InicioPage> {
           ),
           SizedBox(height: 20),
           GestureDetector(
-            onTap: () => redirectSolic(),
+            onTap: () => redirectSolic,
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 5),
               width: 330,
@@ -177,7 +177,7 @@ class _InicioPageState extends State<InicioPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () => redirectSolic(),
+                    onPressed: () => redirectSolic,
                     icon: Icon(
                       Icons.call_merge_rounded,
                       color: Color(0xFFFFFFFF),

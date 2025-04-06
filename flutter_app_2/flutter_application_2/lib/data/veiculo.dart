@@ -1,15 +1,15 @@
-import 'package:flutter/widgets.dart';
+enum StatusVeiculo { disponivel, indisponivel, emManutencao }
 
 class Veiculo {
   final int id;
   String placa;
   String chassi;
-  Enum status;
+  StatusVeiculo status;
   final String qrCode;
   String ano;
   String cor;
   int capacidade;
-  Text obsUser;
+  String obsUser; // Alterado para String
   int kmRevisao;
 
   Veiculo({
@@ -30,34 +30,36 @@ class Veiculo {
       id: json['id'],
       placa: json['placa'],
       chassi: json['chassi'],
-      status: json['status'],
+      status: StatusVeiculo.values.firstWhere(
+        (e) => e.toString().split('.').last == json['status'],
+        orElse: () => StatusVeiculo.indisponivel,
+      ),
       qrCode: json['qrCode'],
       ano: json['ano'],
       cor: json['cor'],
       capacidade: json['capacidade'],
-      obsUser: json['obsUser'],
-      kmRevisao: json['kmRevisao'],
+      obsUser: json['obsUser'] ?? '',
+      kmRevisao: json['kmRevisao'] ?? 0,
     );
   }
 
-  // Map<String, dynamic> toJson()
-  // {
-  //   return [
-  //     'id' : id,
-  //     'placa' : placa,
-  //     'chassi': chassi,
-  //     'status' : status,
-  //     'qrCode': qrCode,
-  //     'ano' : ano,
-  //     'cor' : cor,
-  //     'capacidade' : capacidade,
-  //     'obsUser' : obsUser,
-  //     'kmRevisao' : kmRevisao,
-  //   ];
-  // }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'placa': placa,
+      'chassi': chassi,
+      'status': status.toString().split('.').last,
+      'qrCode': qrCode,
+      'ano': ano,
+      'cor': cor,
+      'capacidade': capacidade,
+      'obsUser': obsUser,
+      'kmRevisao': kmRevisao,
+    };
+  }
 
   @override
   String toString() {
-    return "Veiculo(id : $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsUser: $obsUser, kmRevisao: $kmRevisao)";
+    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsUser: $obsUser, kmRevisao: $kmRevisao)";
   }
 }

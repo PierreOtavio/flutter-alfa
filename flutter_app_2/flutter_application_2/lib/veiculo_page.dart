@@ -1,166 +1,110 @@
-import 'dart:convert';
-import "package:flutter/material.dart";
-import 'package:flutter_application_2/data/veiculo.dart';
-import 'package:flutter_application_2/inicio_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_2/data/veiculo_repository.dart';
 import 'package:flutter_application_2/veicsoli_page.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_application_2/goals/globals.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_application_2/data/veiculo.dart';
 
 class VeiculoPage extends StatefulWidget {
   const VeiculoPage({super.key});
+
   @override
   State<VeiculoPage> createState() => _VeiculoPageState();
 }
 
 class _VeiculoPageState extends State<VeiculoPage> {
-  bool isLoading = false;
-  List<Map<String, dynamic>> veiculos = [];
-  List<Map<String, dynamic>> veiculosFiltrados = [];
+  final VeiculoRepository _repository = VeiculoRepository();
+  List<Veiculo> veiculosFiltrados = [];
+  bool isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    buscarVeiculo();
+    _carregarVeiculos();
   }
 
-  Future<void> redirectSolic() async {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => VeicsoliPage()),
-    );
-  }
-
-  // Método para ler QR Code
-  Future<void> readQR() async 
-  {
-    
-    
-  }
-
-
-  // Future<void> lerQRCode() async {
-  //   String barcodeScanRes;
-
-  //   try {
-  //     // Chamando o scanner com os parâmetros:
-  //     // - "#FF013A65" (cor da linha de escaneamento - azul da sua interface)
-  //     // - "Cancelar" (texto do botão de cancelar)
-  //     // - true (mostrar botão de flash)
-  //     // - ScanMode.QR (modo de escaneamento: apenas QR code)
-  //     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-  //       "#FF013A65",
-  //       "Cancelar",
-  //       true,
-  //       ScanMode.QR,
-  //     );
-
-  //     // Se o usuário cancelar, retorna "-1"
-  //     if (barcodeScanRes != "-1") {
-  //       setState(() {
-  //         resultadoQR = barcodeScanRes;
-  //       });
-
-  //       // Aqui você pode implementar a lógica para buscar o veículo pelo QR Code
-  //       buscarVeiculoPorQRCode(barcodeScanRes);
-  //     }
-  //   } on PlatformException {
-  //     setState(() {
-  //       resultadoQR = "Erro ao escanear QR code";
-  //     });
-  //   }
-  // }
-
-  // Método para buscar veículo pelo QR Code
-  // Future<void> buscarVeiculoPorQRCode(String qrCode) async {
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-
-  //   try {
-  //     // Você pode implementar a lógica específica para buscar na API pelo QR Code
-  //     // Por exemplo:
-  //     final response = await http.get(
-  //       Uri.parse('http://127.0.0.1:8000/api/veiculos/qrcode/$qrCode'),
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       // Processa o resultado
-  //       Map<String, dynamic> veiculo = jsonDecode(response.body);
-
-  //       // Mostra um snackbar com o resultado
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Veículo encontrado: ${veiculo['nome']}')),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print("Erro ao buscar veículo por QR Code: $e");
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(SnackBar(content: Text('Veículo não encontrado')));
-  //   } finally {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
-  Future<void> buscarVeiculo() async {
+  Future<void> _carregarVeiculos() async {
+    setState(() => isLoading = true);
     try {
+      await _repository.carregarVeiculos();
       setState(() {
-        isLoading = true;
-      });
-
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/veiculos'),
-      );
-
-      if (response.statusCode == 200) {
-        print('Resposta: ${response.body}');
-        List<dynamic> vehicles = jsonDecode(response.body);
-
-        
-
-        List<Map<String, dynamic>> availableVehicles =
-            vehicles
-                .where((vehicle) => vehicle['status'] == 'disponivel')
-                .map(
-                  (vehicle) => {
-                    'nome': vehicle['nome'] ?? 'Sem nome',
-                    'marca': vehicle['marca'] ?? 'Sem marca',
-                  },
-                )
-                .toList();
-
-        setState(() {
-          veiculos = availableVehicles;
-          veiculosFiltrados = availableVehicles;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print("Erro ao buscar veículos: $e");
-      setState(() {
+        veiculosFiltrados = _repository.veiculos;
         isLoading = false;
       });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao carregar veículos: $e')),
+        );
+        setState(() => isLoading = false);
+      }
     }
   }
 
-  void filtrarVeiculos(String query) {
+  void _filtrarVeiculos(String query) {
     setState(() {
       if (query.isEmpty) {
-        veiculosFiltrados = veiculos;
+        veiculosFiltrados = _repository.veiculos;
       } else {
-        veiculosFiltrados =
-            veiculos
-                .where(
-                  (veiculo) => veiculo['nome'].toLowerCase().contains(
-                    query.toLowerCase(),
-                  ),
-                )
-                .toList();
+        veiculosFiltrados = _repository.buscarLocalmente(query);
       }
     });
+  }
+
+  Future<void> _lerQRCode() async {
+    try {
+      final resultadoQR = await FlutterBarcodeScanner.scanBarcode(
+        "#FF013A65",
+        "Cancelar",
+        true,
+        ScanMode.QR,
+      );
+
+      if (resultadoQR != "-1") {
+        Veiculo? veiculoEncontrado;
+
+        try {
+          veiculoEncontrado = _repository.veiculos.firstWhere(
+            (veiculo) => veiculo.qrCode == resultadoQR,
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Veículo encontrado: ${veiculoEncontrado.placa}'),
+            ),
+          );
+          // Aqui você poderia navegar para página de solicitação
+          // Navigator.push(context, MaterialPageRoute(builder: (context) => VeicsoliPage(veiculo: veiculoEncontrado)));
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'QR Code não corresponde a nenhum veículo disponível.',
+              ),
+            ),
+          );
+        }
+      }
+    } on PlatformException {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Erro ao acessar a câmera')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao ler QR Code: $e')));
+    }
+  }
+
+  void _navegarParaSolicitacao(Veiculo veiculo) {
+    // Implemente a navegação para a página de solicitação
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VeicsoliPage(veiculo: veiculo.toJson()),
+      ),
+    );
   }
 
   @override
@@ -168,30 +112,27 @@ class _VeiculoPageState extends State<VeiculoPage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Color(0xFFFFFFFF)),
-          iconSize: 30,
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Lista de Veículos',
-          style: TextStyle(fontSize: 25, color: Color(0xFFFFFFFF)),
-          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 25, color: Colors.white),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
-            iconSize: 30,
-            onPressed: () => buscarVeiculo(),
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _carregarVeiculos,
           ),
         ],
-        backgroundColor: Color(0xFF013A65),
-        shape: RoundedRectangleBorder(
+        backgroundColor: const Color(0xFF013A65),
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(18.5)),
         ),
         toolbarHeight: 100,
       ),
-      backgroundColor: Color(0xFF303030),
+      backgroundColor: const Color(0xFF303030),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -199,9 +140,10 @@ class _VeiculoPageState extends State<VeiculoPage> {
           children: [
             // Campo de pesquisa
             TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 hintText: "Pesquise um carro",
-                suffixIcon: Icon(Icons.search, color: Colors.white),
+                suffixIcon: const Icon(Icons.search, color: Colors.white),
                 filled: true,
                 fillColor: Colors.grey[800],
                 border: OutlineInputBorder(
@@ -209,13 +151,13 @@ class _VeiculoPageState extends State<VeiculoPage> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              style: TextStyle(color: Colors.white),
-              onChanged: filtrarVeiculos,
+              style: const TextStyle(color: Colors.white),
+              onChanged: _filtrarVeiculos,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Título da lista de veículos disponíveis
-            Text(
+            const Text(
               "Veículos disponíveis",
               style: TextStyle(
                 fontSize: 18,
@@ -223,44 +165,33 @@ class _VeiculoPageState extends State<VeiculoPage> {
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
 
             // Lista de veículos ou indicador de carregamento
             Expanded(
               child:
                   isLoading
-                      ? Center(child: CircularProgressIndicator())
+                      ? const Center(child: CircularProgressIndicator())
                       : ListView.builder(
                         itemCount: veiculosFiltrados.length,
                         itemBuilder: (context, index) {
                           final veiculo = veiculosFiltrados[index];
                           return Card(
                             color: Colors.grey[850],
-                            margin: EdgeInsets.only(bottom: 8),
+                            margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               title: Text(
-                                veiculo['nome'],
-                                style: TextStyle(color: Colors.white),
+                                veiculo.placa,
+                                style: const TextStyle(color: Colors.white),
                               ),
                               subtitle: Text(
-                                veiculo['marca'],
-                                style: TextStyle(color: Colors.grey[400]),
+                                veiculo.chassi,
+                                style: const TextStyle(color: Colors.grey),
                               ),
                               trailing: IconButton(
-                                icon: Icon(
-                                  Icons.add,
-                                  color: Colors.blue,
-                                  size: 30,
-                                ),
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        '${veiculo['nome']} adicionado ao carrinho!',
-                                      ),
-                                    ),
-                                  );
-                                },
+                                icon: const Icon(Icons.add, color: Colors.blue),
+                                onPressed:
+                                    () => _navegarParaSolicitacao(veiculo),
                               ),
                             ),
                           );
@@ -268,20 +199,22 @@ class _VeiculoPageState extends State<VeiculoPage> {
                       ),
             ),
 
-            // Botão para leitura de QR Code
-            SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: , // Conecta ao método de leitura de QR Code
-              icon: Icon(Icons.camera_alt, color: Colors.white),
-              label: Text(
-                "Leia um QR Code",
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
-                backgroundColor: Color(0xFF013A65),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            // Botão QR Code
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: ElevatedButton.icon(
+                onPressed: _lerQRCode,
+                icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                label: const Text(
+                  "Leia um QR Code",
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF013A65),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
