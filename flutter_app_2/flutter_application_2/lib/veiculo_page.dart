@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/data/veiculo_repository.dart';
 import 'package:flutter_application_2/veicsoli_page.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
+import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 
 class VeiculoPage extends StatefulWidget {
   const VeiculoPage({super.key});
