@@ -1,15 +1,15 @@
-enum StatusVeiculo { disponivel, indisponivel, emManutencao }
+// enum StatusVeiculo { disponivel, indisponivel, emManutencao }
 
 class Veiculo {
   final int id;
   String placa;
   String chassi;
-  StatusVeiculo status;
+  String status;
   final String qrCode;
   String ano;
   String cor;
   int capacidade;
-  String obsUser; // Alterado para String
+  String obsVeiculo; // Alterado para String
   int kmRevisao;
 
   Veiculo({
@@ -21,7 +21,7 @@ class Veiculo {
     required this.ano,
     required this.cor,
     required this.capacidade,
-    required this.obsUser,
+    required this.obsVeiculo,
     required this.kmRevisao,
   });
 
@@ -30,16 +30,13 @@ class Veiculo {
       id: json['id'],
       placa: json['placa'],
       chassi: json['chassi'],
-      status: StatusVeiculo.values.firstWhere(
-        (e) => e.toString().split('.').last == json['status'],
-        orElse: () => StatusVeiculo.indisponivel,
-      ),
+      status: json['status_veiculo'],
       qrCode: json['qrCode'],
       ano: json['ano'],
       cor: json['cor'],
       capacidade: json['capacidade'],
-      obsUser: json['obsUser'] ?? '',
-      kmRevisao: json['kmRevisao'] ?? 0,
+      obsVeiculo: json['obs_veiculo'] ?? '',
+      kmRevisao: json['km_revisao'] ?? 0,
     );
   }
 
@@ -53,13 +50,13 @@ class Veiculo {
       'ano': ano,
       'cor': cor,
       'capacidade': capacidade,
-      'obsUser': obsUser,
+      'obsUser': obsVeiculo,
       'kmRevisao': kmRevisao,
     };
   }
 
   @override
   String toString() {
-    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsUser: $obsUser, kmRevisao: $kmRevisao)";
+    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsUser: $obsVeiculo, kmRevisao: $kmRevisao)";
   }
 }

@@ -35,7 +35,7 @@ class _InicioPageState extends State<InicioPage> {
   Future<void> redirectSolic(veiculo) async {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => VeicsoliPage(veiculo: veiculo)),
+      MaterialPageRoute(builder: (context) => VeicSoliPage(veiculo: veiculo)),
     );
   }
 
