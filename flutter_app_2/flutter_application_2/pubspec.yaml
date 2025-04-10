@@ -37,7 +37,7 @@ dependencies:
     http: ^0.13.6
     shared_preferences: 2.2.0
     provider: ^6.0.0
-    # flutter_secure_storage: ^5.0.2
+    flutter_secure_storage: ^9.2.4
     dropdown_button2: ^2.3.9
     sqflite: ^2.0.0+4
     path: ^1.8.3

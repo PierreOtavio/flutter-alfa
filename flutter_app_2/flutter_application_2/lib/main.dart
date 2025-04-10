@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/login_page.dart';
-import 'package:flutter_application_2/veiculo_page.dart';
 
 void main() {
   runApp(const MyApp());

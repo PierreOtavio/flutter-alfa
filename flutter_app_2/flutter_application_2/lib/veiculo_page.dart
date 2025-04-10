@@ -1,12 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/goals/globals.dart';
-import 'package:flutter_application_2/inicio_page.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_2/veicsoli_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_2/data/veiculo.dart';
-import 'package:flutter_application_2/components/qr_code_scan.dart';
-import 'package:path/path.dart';
+import 'package:flutter_application_2/components/qr_code_scan.dart'; // Verifique o caminho
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VeiculoPage extends StatefulWidget {
   const VeiculoPage({super.key});
@@ -18,87 +20,250 @@ class VeiculoPage extends StatefulWidget {
 class _VeiculoPageState extends State<VeiculoPage> {
   final TextEditingController searchController = TextEditingController();
   bool isLoading = false;
+  String? errorMessage;
 
   List<Veiculo> veiculos = [];
   List<Veiculo> filtroAply = [];
 
+  final _secureStorage = const FlutterSecureStorage();
+  final String _tokenKey = 'auth_token'; // <-- SUA CHAVE REAL
+
+  final String apiUrl =
+      kIsWeb
+          ? 'http://127.0.0.1:8000/api/veiculos/disponiveis'
+          : Platform.isAndroid
+          ? 'http://10.0.2.2:8000/api/veiculos/disponiveis'
+          : 'http://127.0.0.1:8000/api/veiculos/disponiveis';
+
+  @override
   void initState() {
     super.initState();
-    bringVehic();
+    getVeiculos();
+    searchController.addListener(_applyFilter);
   }
 
-  Future<void> bringVehic() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
+  @override
+  void dispose() {
+    searchController.removeListener(_applyFilter);
+    searchController.dispose();
+    super.dispose();
+  }
 
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/veiculos/disponiveis'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final vehicData = data['veiculos'];
-        print('reposta: ${vehicData}');
-
-        instanceVeiculo = Veiculo(
-          id: vehicData['id'],
-          placa: vehicData['placa'],
-          chassi: vehicData['chassi'],
-          status: vehicData['status_veiculo'],
-          qrCode: vehicData['qr_code'],
-          ano: vehicData['ano'],
-          cor: vehicData['cor'],
-          capacidade: vehicData['capacidade'],
-          obsVeiculo: vehicData['obs_veiculo'],
-          kmRevisao: vehicData['km_revisao'],
-        );
-
-        print(instanceVeiculo);
-      } else {
-        return print('erro na API: ${response}');
+  void _handleError(dynamic e) {
+    if (!mounted) return;
+    print('Erro detalhado: $e');
+    String message;
+    if (e is SocketException || e is http.ClientException) {
+      message = 'Erro de conexão. Verifique a rede ou a URL da API ($apiUrl).';
+    } else if (e is FormatException) {
+      message = 'Erro ao processar a resposta do servidor.';
+    } else if (e is PlatformException &&
+        (e.code == 'UnsupportedOSVersion' ||
+            e.message?.contains('available') == true)) {
+      message =
+          'Erro: Armazenamento seguro não suportado nesta plataforma/versão.';
+    } else if (e is PlatformException) {
+      message = 'Erro no armazenamento seguro: ${e.message} (${e.code})';
+    } else {
+      message = e is Exception ? e.toString() : 'Ocorreu um erro inesperado.';
+      if (message.startsWith('Exception: ')) {
+        message = message.substring('Exception: '.length);
       }
-    } catch (e) {
-      print('errors: ${e}');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
     }
-  }
-
-  void _filtroVehic() {
-    final query = searchController.text.toLowerCase();
-
     setState(() {
-      filtroAply =
-          veiculos.where((veiculo) {
-            return veiculo.placa.toLowerCase().contains(query) ||
-                veiculo.chassi.toLowerCase().contains(query) ||
-                veiculo.cor.toLowerCase().contains(query);
-          }).toList();
+      isLoading = false;
+      errorMessage = message;
     });
   }
 
-  Future<void> scanQrCode(context) async {
+  Future<String?> _getToken() async {
+    if (kIsWeb) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString(_tokenKey);
+        print(
+          "Token lido do SharedPreferences (Web): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
+        );
+        return token;
+      } catch (e) {
+        print("Erro ao ler SharedPreferences na Web: $e");
+        _handleError("Erro ao acessar preferências na web: $e");
+        return null;
+      }
+    } else {
+      try {
+        final token = await _secureStorage.read(key: _tokenKey);
+        print(
+          "Token lido do Secure Storage (Mobile): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
+        );
+        return token;
+      } on PlatformException catch (e) {
+        print("Erro ao ler token do Secure Storage: $e");
+        _handleError(e);
+        return null;
+      } catch (e) {
+        print("Erro inesperado ao ler Secure Storage: $e");
+        _handleError("Erro inesperado ao ler armazenamento: $e");
+        return null;
+      }
+    }
+  }
+
+  Future<void> getVeiculos() async {
+    if (!mounted) return;
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    String? authToken;
+    try {
+      authToken = await _getToken();
+
+      if (authToken == null || authToken.isEmpty) {
+        print('Token não encontrado ou inválido. Redirecionando para login.');
+        setState(() {
+          isLoading = false;
+          errorMessage =
+              'Autenticação necessária. Faça o login para continuar.';
+        });
+        // await _logoutAndRedirect(showError: false);
+        return;
+      }
+
+      final Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $authToken',
+      };
+
+      print('Buscando veículos em: $apiUrl');
+      final response = await http
+          .get(Uri.parse(apiUrl), headers: headers)
+          .timeout(const Duration(seconds: 20));
+
+      if (!mounted) return;
+
+      print('Status Code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if (data is Map<String, dynamic> &&
+            data.containsKey('veiculos') &&
+            data['veiculos'] is List) {
+          final List<dynamic> veiculosJson = data['veiculos'];
+          // !!! Garanta que Veiculo.fromJson pega os IDs corretamente !!!
+          final List<Veiculo> fetchedVeiculos =
+              veiculosJson
+                  .map((json) => Veiculo.fromJson(json as Map<String, dynamic>))
+                  .toList();
+          setState(() {
+            veiculos = fetchedVeiculos;
+            _applyFilter(); // Aplica filtro inicial/atual
+            isLoading = false;
+          });
+        } else {
+          print(
+            "API retornou 200 OK, mas formato inesperado. Body: ${response.body}",
+          );
+          setState(() {
+            veiculos = [];
+            filtroAply = [];
+            isLoading = false;
+            errorMessage =
+                data is Map && data.containsKey('message')
+                    ? data['message']
+                    : "Resposta inesperada do servidor.";
+          });
+        }
+      } else if (response.statusCode == 401) {
+        print('Erro 401: Token inválido/expirado. Deslogando...');
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Sessão expirada ou inválida. Faça o login novamente.';
+        });
+        // await _logoutAndRedirect(showError: false);
+      } else if (response.statusCode == 404) {
+        var data = jsonDecode(response.body);
+        print("API retornou 404: ${data['error'] ?? response.body}");
+        setState(() {
+          errorMessage =
+              data['error'] ?? 'Nenhum veículo disponível encontrado (404).';
+          veiculos = [];
+          filtroAply = [];
+          isLoading = false;
+        });
+      } else {
+        throw Exception(
+          'Falha ao carregar veículos (Status: ${response.statusCode}) - Resposta: ${response.body}',
+        );
+      }
+    } catch (e) {
+      print("Erro no bloco principal de getVeiculos: $e");
+      _handleError(e);
+      if (mounted && isLoading) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  // --- Função _applyFilter (MODIFICADA PARA USAR IDs) ---
+  void _applyFilter() {
+    if (!mounted) return;
+    final query = searchController.text.toLowerCase().trim();
+    setState(() {
+      if (query.isEmpty) {
+        filtroAply = veiculos;
+      } else {
+        filtroAply =
+            veiculos.where((veiculo) {
+              final placaLower = veiculo.placa.toLowerCase();
+              final chassiLower = veiculo.chassi.toLowerCase();
+
+              // Converte os IDs (int?) para String para a busca por texto.
+              // Se o ID for null, usa uma string vazia para não dar erro.
+              final marcaIdStr = veiculo.marcaId?.toString() ?? '';
+              final modeloIdStr = veiculo.modeloId?.toString() ?? '';
+
+              // Verifica se a query está contida em algum dos campos (incluindo IDs como string)
+              return placaLower.contains(query) ||
+                  chassiLower.contains(query) ||
+                  marcaIdStr.contains(
+                    query,
+                  ) || // Busca no ID da marca (convertido para string)
+                  modeloIdStr.contains(
+                    query,
+                  ); // Busca no ID do modelo (convertido para string)
+            }).toList();
+      }
+    });
+  }
+  // --- Fim da Modificação ---
+
+  void _scanQrCode() {
+    if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const QRCodeScannerPage()),
+      MaterialPageRoute(
+        builder: (context) => const QRCodeScannerPage(), // Use o nome correto
+      ),
     );
   }
 
-  void _navegarParaSolicitacao(Veiculo veiculo, context) {
+  void _handleVeiculoSelect(Veiculo veiculo) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => VeicSoliPage(veiculo: veiculo)),
     );
+    // Implemente a ação desejada
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        /* ... AppBar igual ... */
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -108,12 +273,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
           'Lista de Veículos',
           style: TextStyle(fontSize: 25, color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: bringVehic,
-          ),
-        ],
+
         backgroundColor: const Color(0xFF013A65),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(18.5)),
@@ -126,11 +286,13 @@ class _VeiculoPageState extends State<VeiculoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Campo de pesquisa
             TextField(
+              // Campo de pesquisa
               controller: searchController,
               decoration: InputDecoration(
-                hintText: "Pesquise um carro",
+                hintText:
+                    "Pesquisar por Placa, Chassi, ID Marca/Modelo...", // Hint atualizado
+                hintStyle: TextStyle(color: Colors.grey[400]),
                 suffixIcon: const Icon(Icons.search, color: Colors.white),
                 filled: true,
                 fillColor: Colors.grey[800],
@@ -140,12 +302,10 @@ class _VeiculoPageState extends State<VeiculoPage> {
                 ),
               ),
               style: const TextStyle(color: Colors.white),
-              onChanged: (value) => _filtroVehic(),
             ),
             const SizedBox(height: 16),
-
-            // Título da lista de veículos disponíveis
             const Text(
+              // Título
               "Veículos disponíveis",
               style: TextStyle(
                 fontSize: 18,
@@ -154,50 +314,25 @@ class _VeiculoPageState extends State<VeiculoPage> {
               ),
             ),
             const SizedBox(height: 8),
-
-            // Lista de veículos ou indicador de carregamento
             Expanded(
+              // Conteúdo
               child:
                   isLoading
                       ? const Center(child: CircularProgressIndicator())
-                      : ListView.builder(
-                        itemCount: veiculos.length,
-                        itemBuilder: (context, index) {
-                          final veiculo = filtroAply[index];
-                          return Card(
-                            color: Colors.grey[850],
-                            margin: const EdgeInsets.only(bottom: 8),
-                            child: ListTile(
-                              title: Text(
-                                veiculo.placa,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              subtitle: Text(
-                                veiculo.chassi,
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.add, color: Colors.blue),
-                                onPressed:
-                                    () => _navegarParaSolicitacao(
-                                      veiculo,
-                                      context,
-                                    ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                      : errorMessage != null
+                      ? _buildErrorWidget(errorMessage!)
+                      : filtroAply.isEmpty
+                      ? _buildEmptyListWidget()
+                      : _buildVeiculoList(), // <= Chamada modificada implicitamente
             ),
-
-            // Botão QR Code
             Padding(
+              // Botão QR Code
               padding: const EdgeInsets.only(top: 16.0),
               child: ElevatedButton.icon(
-                onPressed: () => scanQrCode(context),
+                onPressed: _scanQrCode,
                 icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: const Text(
-                  "Leia um QR Code",
+                  "Ler QR Code do Veículo",
                   style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -212,6 +347,101 @@ class _VeiculoPageState extends State<VeiculoPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildErrorWidget(String message) {
+    // ... (Widget de erro igual ao anterior) ...
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orangeAccent[100],
+              size: 40,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              style: TextStyle(color: Colors.orangeAccent[100], fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 15),
+            if (message.contains("Autenticação necessária") ||
+                message.contains("Sessão expirada"))
+              ElevatedButton.icon(
+                icon: const Icon(Icons.refresh),
+                label: const Text("Tentar Novamente"),
+                onPressed: getVeiculos,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyListWidget() {
+    // ... (Widget de lista vazia igual ao anterior) ...
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          searchController.text.isEmpty
+              ? "Nenhum veículo disponível encontrado."
+              : "Nenhum veículo encontrado para '${searchController.text}'.",
+          style: const TextStyle(color: Colors.white70, fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  // --- Widget _buildVeiculoList (MODIFICADO PARA MOSTRAR IDs) ---
+  Widget _buildVeiculoList() {
+    return ListView.builder(
+      itemCount: filtroAply.length,
+      itemBuilder: (context, index) {
+        final veiculo = filtroAply[index];
+        return Card(
+          color: Colors.grey[850],
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+          child: ListTile(
+            title: Text(
+              // Mostra os IDs de forma clara, tratando null
+              'Placa: ${veiculo.placa}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: Text(
+              'Chassi: ${veiculo.chassi}\n' // Quebra de linha para clareza
+              'Marca ID: ${veiculo.marcaId ?? "N/A"} | '
+              'Modelo ID: ${veiculo.modeloId ?? "N/A"} | '
+              'Cor: ${veiculo.cor ?? "N/A"}',
+              style: TextStyle(
+                color: Colors.grey[400],
+                height: 1.4,
+              ), // Ajusta altura da linha
+            ),
+            trailing: IconButton(
+              tooltip: 'Selecionar este veículo',
+              icon: const Icon(
+                Icons.add_circle_outline,
+                color: Colors.blueAccent,
+                size: 28,
+              ),
+              onPressed: () => _handleVeiculoSelect(veiculo),
+            ),
+            isThreeLine: true, // Permite mais espaço para o subtítulo
+            onTap: () => _handleVeiculoSelect(veiculo),
+          ),
+        );
+      },
     );
   }
 }

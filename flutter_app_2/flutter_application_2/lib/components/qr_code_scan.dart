@@ -17,15 +17,18 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Escanear QR Code'),
+        title: const Text(
+          'Escanear QR Code',
+          style: TextStyle(color: Colors.white, fontSize: 25),
+        ),
         backgroundColor: const Color(0xFF013A65),
         actions: [
           IconButton(
-            icon: const Icon(Icons.flash_on),
+            icon: const Icon(Icons.flash_on, color: Colors.white),
             onPressed: () => controller.toggleTorch(), // Liga/desliga o flash
           ),
           IconButton(
-            icon: const Icon(Icons.flip_camera_android),
+            icon: const Icon(Icons.flip_camera_android, color: Colors.white),
             onPressed:
                 () =>
                     controller
@@ -56,7 +59,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
             child: Center(
               child: Text(
                 qrCodeResult ?? 'Escaneie um QR Code',
-                style: const TextStyle(fontSize: 18, color: Colors.black),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
           ),

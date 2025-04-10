@@ -10,8 +10,15 @@ class VeicSoliPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Solicitação - ${veiculo.placa}'),
+        title: Text(
+          'Solicitação - ${veiculo.placa}',
+          style: const TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF013A65),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       backgroundColor: const Color(0xFF303030),
       body: Padding(
@@ -59,7 +66,10 @@ class VeicSoliPage extends StatelessWidget {
                 print('Solicitação realizada para o veículo ${veiculo.placa}');
               },
               icon: const Icon(Icons.send, color: Colors.white),
-              label: const Text('Realizar Solicitação'),
+              label: const Text(
+                'Realizar Solicitação',
+                style: TextStyle(color: Colors.white),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF013A65),
                 minimumSize: const Size(double.infinity, 50),
