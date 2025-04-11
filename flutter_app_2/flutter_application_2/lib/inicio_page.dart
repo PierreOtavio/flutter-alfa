@@ -42,7 +42,7 @@ class _InicioPageState extends State<InicioPage> {
   Future<void> redirectNotify() async {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NotifyPage()),
+      MaterialPageRoute(builder: (context) => NotificacoesGeral()),
     );
   }
 
@@ -105,7 +105,10 @@ class _InicioPageState extends State<InicioPage> {
                       const SizedBox(height: 5),
                       Text(
                         instance!.status,
-                        style: const TextStyle(color: Colors.white, fontSize: 19),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                        ),
                       ),
                     ],
                   ),
@@ -269,11 +272,7 @@ class _InicioPageState extends State<InicioPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            const Icon(
-              Icons.notifications,
-              color: Colors.white,
-              size: 32,
-            ),
+            const Icon(Icons.notifications, color: Colors.white, size: 32),
             Positioned(
               top: 8,
               right: 8,
@@ -285,11 +284,7 @@ class _InicioPageState extends State<InicioPage> {
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
-                  child: Icon(
-                    Icons.error,
-                    color: Colors.white,
-                    size: 14,
-                  ),
+                  child: Icon(Icons.error, color: Colors.white, size: 14),
                 ),
               ),
             ),
