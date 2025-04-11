@@ -224,8 +224,8 @@ class _VeiculoPageState extends State<VeiculoPage> {
 
               // Converte os IDs (int?) para String para a busca por texto.
               // Se o ID for null, usa uma string vazia para não dar erro.
-              final marcaIdStr = veiculo.marcaId?.toString() ?? '';
-              final modeloIdStr = veiculo.modeloId?.toString() ?? '';
+              final marcaIdStr = veiculo.marca?.toString() ?? '';
+              final modeloIdStr = veiculo.modelo?.toString() ?? '';
 
               // Verifica se a query está contida em algum dos campos (incluindo IDs como string)
               return placaLower.contains(query) ||
@@ -264,6 +264,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Veículos'),
+
       //   /* ... AppBar igual ... */
       //   leading: IconButton(
       //     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -407,39 +408,51 @@ class _VeiculoPageState extends State<VeiculoPage> {
       itemCount: filtroAply.length,
       itemBuilder: (context, index) {
         final veiculo = filtroAply[index];
-        return Card(
-          color: Colors.grey[850],
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
-          child: ListTile(
-            title: Text(
-              // Mostra os IDs de forma clara, tratando null
-              'Placa: ${veiculo.placa}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        return Container(
+          margin: const EdgeInsets.symmetric(
+            vertical: 8,
+          ), // Espaço entre os containers
+          padding: const EdgeInsets.all(16), // Preenchimento interno
+          decoration: BoxDecoration(
+            color: Colors.grey[800], // Fundo cinza escuro
+            borderRadius: BorderRadius.circular(10), // Bordas arredondadas
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Placa: ${veiculo.placa}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8), // Espaço entre os textos
+                    Text(
+                      'Marca: ${veiculo.marca.marca ?? "N/A"} | '
+                      'Modelo: ${veiculo.modelo.modelo ?? "N/A"} | '
+                      'Cor: ${veiculo.cor ?? "N/A"}',
+                      style: TextStyle(color: Colors.grey[400], height: 1.4),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            subtitle: Text(
-              'Chassi: ${veiculo.chassi}\n' // Quebra de linha para clareza
-              'Marca ID: ${veiculo.marcaId ?? "N/A"} | '
-              'Modelo ID: ${veiculo.modeloId ?? "N/A"} | '
-              'Cor: ${veiculo.cor ?? "N/A"}',
-              style: TextStyle(
-                color: Colors.grey[400],
-                height: 1.4,
-              ), // Ajusta altura da linha
-            ),
-            trailing: IconButton(
-              tooltip: 'Selecionar este veículo',
-              icon: const Icon(
-                Icons.add_circle_outline,
-                color: Colors.blueAccent,
-                size: 28,
+              IconButton(
+                icon: const Icon(Icons.add, color: Colors.blue),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VeicSoliPage(veiculo: veiculo),
+                    ),
+                  ); // Função ao clicar no botão
+                },
               ),
-              onPressed: () => _handleVeiculoSelect(veiculo),
-            ),
-            isThreeLine: true, // Permite mais espaço para o subtítulo
-            onTap: () => _handleVeiculoSelect(veiculo),
+            ],
           ),
         );
       },

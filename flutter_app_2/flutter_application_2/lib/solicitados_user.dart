@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 
 class SolicitacaoVeiculoPage extends StatelessWidget {
+  SolicitacaoVeiculoPage({super.key});
   final List<Map<String, String>> veiculos = [
     {'modelo': 'Honda Civic', 'placa': 'xxxx-1234'},
     {'modelo': 'Toyota Corolla', 'placa': 'yyyy-4567'},

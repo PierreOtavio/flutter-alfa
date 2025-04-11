@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart'; // Para debugPrint
+import 'package:flutter/foundation.dart';
+import 'package:flutter_application_2/data/marca.dart';
+import 'package:flutter_application_2/data/modelo.dart'; // Para debugPrint
 
 class Veiculo {
   final int id; // Obrigatório
@@ -11,8 +13,8 @@ class Veiculo {
   final int capacidade; // Obrigatório
   final String? obsVeiculo; // Opcional (pode ser null)
   final int kmRevisao; // Obrigatório
-  final int modeloId; // Obrigatório
-  final int marcaId; // Obrigatório
+  final Modelo modelo; // Obrigatório
+  final Marca marca; // Obrigatório
 
   Veiculo({
     required this.id,
@@ -25,8 +27,8 @@ class Veiculo {
     required this.capacidade,
     this.obsVeiculo, // Não é required
     required this.kmRevisao,
-    required this.modeloId,
-    required this.marcaId,
+    required this.modelo,
+    required this.marca,
   });
 
   factory Veiculo.fromJson(Map<String, dynamic> json) {
@@ -95,11 +97,10 @@ class Veiculo {
         kmRevisao:
             (json['km_revisao'] as int?) ??
             0, // Assume 0 se API mandar null, mas campo é obrigatório na classe
-
         // Alternativa estrita para kmRevisao (se API NUNCA deve mandar null):
         // kmRevisao: getRequiredField<int>(json, 'km_revisao'),
-        modeloId: getRequiredField<int>(json, 'modelo_id'), // Chave correta
-        marcaId: getRequiredField<int>(json, 'marca_id'), // Chave correta
+        modelo: Modelo.fromJson(json['modelo']),
+        marca: Marca.fromJson(json['marca']), // Chave correta
       );
     } catch (e) {
       // Adiciona mais contexto ao erro antes de relançar ou tratar
@@ -130,14 +131,14 @@ class Veiculo {
       'obs_veiculo':
           obsVeiculo, // Chave correta para API (envia null se for null)
       'km_revisao': kmRevisao, // Chave correta para API
-      'modelo_id': modeloId, // Chave correta para API
-      'marca_id': marcaId, // Chave correta para API
+      'modelo': modelo, // Chave correta para API
+      'marca': marca, // Chave correta para API
     };
   }
 
   @override
   String toString() {
     // toString não precisa de chaves de API
-    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsVeiculo: $obsVeiculo, kmRevisao: $kmRevisao, modeloId: $modeloId, marcaId: $marcaId)";
+    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsVeiculo: $obsVeiculo, kmRevisao: $kmRevisao, modeloId: $modelo, marcaId: $marca)";
   }
 }

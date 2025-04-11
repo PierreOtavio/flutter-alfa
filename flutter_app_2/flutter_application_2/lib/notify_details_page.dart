@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/components/app_bar.dart';
 
 class NotificacaoDetalhe extends StatefulWidget {
   const NotificacaoDetalhe({super.key});
@@ -12,28 +13,29 @@ class _NotificacaoDetalheState extends State<NotificacaoDetalhe> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
-      appBar: AppBar(
-        backgroundColor: Colors.blue[900],
-        title: const Text(
-          'Notificações',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              // Atualizar detalhe (se necessário)
-            },
-          ),
-        ],
-      ),
+      appBar: const CustomAppBar(title: 'Detalhes da Notificação'),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.blue[900],
+      //   title: const Text(
+      //     'Notificações',
+      //     style: TextStyle(fontWeight: FontWeight.bold),
+      //   ),
+      //   centerTitle: true,
+      //   leading: IconButton(
+      //     icon: const Icon(Icons.arrow_back),
+      //     onPressed: () {
+      //       Navigator.pop(context);
+      //     },
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.refresh),
+      //       onPressed: () {
+      //         // Atualizar detalhe (se necessário)
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
