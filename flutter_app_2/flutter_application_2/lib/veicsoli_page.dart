@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
 
 class VeicSoliPage extends StatelessWidget {
@@ -9,17 +10,17 @@ class VeicSoliPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Solicitação - ${veiculo.placa}',
-          style: const TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF013A65),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: const CustomAppBar(title: 'Veículo Solicitado'),
+
+      // title: Text(
+      //   'Solicitação - ${veiculo.placa}',
+      //   style: const TextStyle(color: Colors.white),
+      // ),
+      // backgroundColor: const Color(0xFF013A65),
+      // leading: IconButton(
+      //   icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+      //   onPressed: () => Navigator.pop(context),
+      // ),
       backgroundColor: const Color(0xFF303030),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
