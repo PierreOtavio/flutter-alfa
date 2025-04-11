@@ -21,6 +21,10 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
           'Escanear QR Code',
           style: TextStyle(color: Colors.white, fontSize: 25),
         ),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF013A65),
         actions: [
           IconButton(
