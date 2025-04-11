@@ -22,6 +22,7 @@ class NotificacoesGeral extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
+<<<<<<< Updated upstream
       appBar: const CustomAppBar(title: 'Notificações'),
       // appBar: AppBar(
       //   backgroundColor: Colors.blue[900],
@@ -45,6 +46,30 @@ class NotificacoesGeral extends StatelessWidget {
       //     ),
       //   ],
       // ),
+=======
+      appBar: AppBar(
+        backgroundColor: Colors.blue[900],
+        title: const Text(
+          'Notificações',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Voltar pra tela anterior
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              // Atualizar notificações (futuramente)
+            },
+          ),
+        ],
+      ),
+>>>>>>> Stashed changes
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
