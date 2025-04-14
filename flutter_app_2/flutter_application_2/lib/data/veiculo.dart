@@ -6,7 +6,7 @@ class Veiculo {
   final int id; // Obrigatório
   final String placa; // Obrigatório
   final String chassi; // Obrigatório
-  final String status; // Obrigatório (status_veiculo)
+  final String statusVeiculo; // Obrigatório (status_veiculo)
   final String qrCode; // Obrigatório (qr_code)
   final String ano; // Obrigatório (convertido de int)
   final String cor; // Obrigatório
@@ -20,7 +20,7 @@ class Veiculo {
     required this.id,
     required this.placa,
     required this.chassi,
-    required this.status,
+    required this.statusVeiculo,
     required this.qrCode,
     required this.ano,
     required this.cor,
@@ -81,7 +81,7 @@ class Veiculo {
         id: getRequiredField<int>(json, 'id'),
         placa: getRequiredField<String>(json, 'placa'),
         chassi: getRequiredField<String>(json, 'chassi'),
-        status: getRequiredField<String>(
+        statusVeiculo: getRequiredField<String>(
           json,
           'status_veiculo',
         ), // Chave correta
@@ -120,7 +120,7 @@ class Veiculo {
       'id': id,
       'placa': placa,
       'chassi': chassi,
-      'status_veiculo': status, // Chave correta para API
+      'status_veiculo': statusVeiculo, // Chave correta para API
       'qr_code': qrCode, // Chave correta para API
       // A API espera 'ano' como int ou string? Se for int, converte de volta.
       'ano':
@@ -139,6 +139,6 @@ class Veiculo {
   @override
   String toString() {
     // toString não precisa de chaves de API
-    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $status, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsVeiculo: $obsVeiculo, kmRevisao: $kmRevisao, modeloId: $modelo, marcaId: $marca)";
+    return "Veiculo(id: $id, placa: $placa, chassi: $chassi, status: $statusVeiculo, qrCode: $qrCode, ano: $ano, cor: $cor, capacidade: $capacidade, obsVeiculo: $obsVeiculo, kmRevisao: $kmRevisao, modeloId: $modelo, marcaId: $marca)";
   }
 }

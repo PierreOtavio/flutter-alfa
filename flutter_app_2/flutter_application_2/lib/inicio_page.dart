@@ -49,7 +49,7 @@ class _InicioPageState extends State<InicioPage> {
   Future<void> redirectSolicitadosUser() async {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SolicitacaoVeiculoPage()),
+      MaterialPageRoute(builder: (context) => SolicitadosUser()),
     );
   }
 

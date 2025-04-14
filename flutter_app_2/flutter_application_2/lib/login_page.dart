@@ -181,7 +181,10 @@ class _LoginPageState extends State<LoginPage> {
                               value: items,
                               child: Text(
                                 items,
-                                style: const TextStyle(fontSize: 20),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           )
@@ -207,8 +210,10 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Color(0xFFC7C7CF), width: 1),
+                      color: Color(0XFF212121),
                     ),
                   ),
+
                   customButton: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     height: 50,

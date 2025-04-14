@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -264,24 +265,6 @@ class _VeiculoPageState extends State<VeiculoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Veículos'),
-
-      //   /* ... AppBar igual ... */
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-      //     onPressed: () => Navigator.pop(context),
-      //   ),
-      //   centerTitle: true,
-      //   title: const Text(
-      //     'Lista de Veículos',
-      //     style: TextStyle(fontSize: 25, color: Colors.white),
-      //   ),
-
-      //   backgroundColor: const Color(0xFF013A65),
-      //   shape: const RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.vertical(bottom: Radius.circular(18.5)),
-      //   ),
-      //   toolbarHeight: 100,
-      // ),
       backgroundColor: const Color(0xFF303030),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -306,6 +289,8 @@ class _VeiculoPageState extends State<VeiculoPage> {
               style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 16),
+            // const Icon(CupertinoIcons.car_detailed, color: Colors.white),
+            const SizedBox(height: 8),
             const Text(
               // Título
               "Veículos disponíveis",
@@ -338,7 +323,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
                   style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF013A65),
+                  backgroundColor: const Color(0xFF424242),
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -433,9 +418,9 @@ class _VeiculoPageState extends State<VeiculoPage> {
                     ),
                     const SizedBox(height: 8), // Espaço entre os textos
                     Text(
-                      'Marca: ${veiculo.marca.marca ?? "N/A"} | '
-                      'Modelo: ${veiculo.modelo.modelo ?? "N/A"} | '
-                      'Cor: ${veiculo.cor ?? "N/A"}',
+                      'Marca: ${veiculo.marca.marca} | '
+                      'Modelo: ${veiculo.modelo.modelo} | '
+                      'Cor: ${veiculo.cor}',
                       style: TextStyle(color: Colors.grey[400], height: 1.4),
                     ),
                   ],

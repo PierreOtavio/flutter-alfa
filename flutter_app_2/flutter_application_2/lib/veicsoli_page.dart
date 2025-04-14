@@ -1,6 +1,9 @@
+// import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
+import 'package:flutter_application_2/info_add_solic_page.dart';
+// import 'package:http/http.dart' as http;
 
 class VeicSoliPage extends StatelessWidget {
   final Veiculo veiculo;
@@ -11,16 +14,6 @@ class VeicSoliPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Veículo Solicitado'),
-
-      // title: Text(
-      //   'Solicitação - ${veiculo.placa}',
-      //   style: const TextStyle(color: Colors.white),
-      // ),
-      // backgroundColor: const Color(0xFF013A65),
-      // leading: IconButton(
-      //   icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-      //   onPressed: () => Navigator.pop(context),
-      // ),
       backgroundColor: const Color(0xFF303030),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -64,11 +57,17 @@ class VeicSoliPage extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () {
                 // Adicione aqui a lógica para realizar a solicitação
-                print('Solicitação realizada para o veículo ${veiculo.placa}');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => InfoAddSolicPage(veiculoId: veiculo.id),
+                  ),
+                );
               },
-              icon: const Icon(Icons.send, color: Colors.white),
+              icon: const Icon(Icons.podcasts_rounded, color: Colors.white),
               label: const Text(
-                'Realizar Solicitação',
+                'Prosseguir com a Solicitação',
                 style: TextStyle(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(

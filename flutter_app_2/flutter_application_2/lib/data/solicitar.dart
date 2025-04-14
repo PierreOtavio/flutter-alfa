@@ -1,10 +1,11 @@
 class Solicitar {
-  int id;
-  int veiculoId;
+  final int id;
+  final int veiculoId;
   DateTime prevDataInicio;
   DateTime prevHoraInicio;
   DateTime prevDataFinal;
   DateTime prevHoraFinal;
+  String motivo;
 
   Solicitar({
     required this.id,
@@ -13,6 +14,7 @@ class Solicitar {
     required this.prevHoraInicio,
     required this.prevDataFinal,
     required this.prevHoraFinal,
+    required this.motivo,
   });
 
   factory Solicitar.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Solicitar {
       prevHoraInicio: DateTime.parse(json['prev_hora_inicio']),
       prevDataFinal: DateTime.parse(json['prev_data_final']),
       prevHoraFinal: DateTime.parse(json['prev_hora_final']),
+      motivo: json['motivo'],
     );
   }
   Map<String, dynamic> toJson() {
@@ -31,13 +34,14 @@ class Solicitar {
       'veiculo_id': veiculoId,
       'prev_data_inicio': prevDataInicio,
       'prev_hora_inicio': prevHoraInicio,
-      ' prev_data_final': prevDataFinal,
+      'prev_data_final': prevDataFinal,
       'prev_hora_final': prevHoraFinal,
+      'motivo': motivo,
     };
   }
 
   @override
   String toString() {
-    return '(id: $id, veiculo_id: $veiculoId, prev_data_inicio: $prevDataInicio, prev_hora_inicio: $prevHoraInicio, prev_data_final: $prevDataFinal, prev_hora_final: $prevHoraFinal)';
+    return '(id: $id, veiculo_id: $veiculoId, prev_data_inicio: $prevDataInicio, prev_hora_inicio: $prevHoraInicio, prev_data_final: $prevDataFinal, prev_hora_final: $prevHoraFinal, motivo: $motivo)';
   }
 }
