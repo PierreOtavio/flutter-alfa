@@ -1,3 +1,5 @@
+import 'package:flutter_application_2/data/cargo.dart';
+
 class User {
   final int id;
   final String cpf;
@@ -6,6 +8,7 @@ class User {
   final String email;
   final String telefone;
   final String status;
+  final Cargo cargo;
   // final int cargoId;
 
   User({
@@ -16,6 +19,7 @@ class User {
     required this.email,
     required this.telefone,
     required this.status,
+    required this.cargo,
     // required this.cargoId,
   });
 
@@ -28,6 +32,7 @@ class User {
       email: json['email'],
       telefone: json['telefone'],
       status: json['status'],
+      cargo: Cargo.fromJson(json['cargo']),
       // cargoId: json['cargoId'],
     );
   }
@@ -46,6 +51,6 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, cpf: $cpf, name: $name, email: $email, telefone: $telefone, status: $status)';
+    return 'User(id: $id, cpf: $cpf, name: $name, email: $email, telefone: $telefone, status: $status, cargo: $cargo)';
   }
 }

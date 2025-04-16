@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/data/cargo.dart';
 // import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/user.dart';
 import 'package:flutter_application_2/goals/globals.dart';
@@ -54,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
           email: userData['email'],
           telefone: userData['telefone'],
           status: userData['status'],
+          cargo: Cargo.fromJson(userData['cargo']),
           // cargoId: data['cargo_id'],
         );
 

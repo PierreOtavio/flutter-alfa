@@ -104,7 +104,7 @@ class _InicioPageState extends State<InicioPage> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        instance!.status,
+                        instance!.cargo.nome,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 19,
@@ -170,47 +170,47 @@ class _InicioPageState extends State<InicioPage> {
             const SizedBox(height: 20),
 
             // Botão 2 - Veículos Solicitados
-            GestureDetector(
-              onTap: () => redirectSolic(),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 5),
-                width: 330,
-                height: 80,
-                alignment: Alignment.centerRight,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF424242),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () => redirectSolic(),
-                      icon: const Icon(
-                        Icons.call_merge_rounded,
-                        color: Color(0xFFFFFFFF),
-                        size: 40,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Veículos Solicitados',
-                            style: TextStyle(color: Colors.white, fontSize: 25),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
+            // GestureDetector(
+            //   onTap: () => redirectSolic(),
+            //   child: Container(
+            //     margin: const EdgeInsets.symmetric(horizontal: 5),
+            //     width: 330,
+            //     height: 80,
+            //     alignment: Alignment.centerRight,
+            //     decoration: BoxDecoration(
+            //       color: const Color(0xFF424242),
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //     child: Row(
+            //       crossAxisAlignment: CrossAxisAlignment.center,
+            //       children: [
+            //         IconButton(
+            //           onPressed: () => redirectSolic(),
+            //           icon: const Icon(
+            //             Icons.call_merge_rounded,
+            //             color: Color(0xFFFFFFFF),
+            //             size: 40,
+            //           ),
+            //         ),
+            //         const SizedBox(width: 10),
+            //         const Expanded(
+            //           child: Column(
+            //             mainAxisAlignment: MainAxisAlignment.center,
+            //             crossAxisAlignment: CrossAxisAlignment.center,
+            //             children: [
+            //               Text(
+            //                 'Veículos Solicitados',
+            //                 style: TextStyle(color: Colors.white, fontSize: 25),
+            //                 textAlign: TextAlign.center,
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            const SizedBox(height: 18),
 
             // Botão 3 - Ver Solicitações (solicitados_user.dart)
             GestureDetector(
