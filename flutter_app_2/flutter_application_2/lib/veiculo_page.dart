@@ -305,7 +305,9 @@ class _VeiculoPageState extends State<VeiculoPage> {
               // Conteúdo
               child:
                   isLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
                       : errorMessage != null
                       ? _buildErrorWidget(errorMessage!)
                       : filtroAply.isEmpty
@@ -427,7 +429,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.add, color: Colors.blue),
+                icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
                 onPressed: () {
                   Navigator.push(
                     context,

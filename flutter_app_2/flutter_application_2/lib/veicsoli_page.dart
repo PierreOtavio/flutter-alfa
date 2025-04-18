@@ -20,39 +20,54 @@ class VeicSoliPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Detalhes do Veículo',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Detalhes do Veículo',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Placa: ${veiculo.placa}',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    'Chassi: ${veiculo.chassi}',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    'Ano: ${veiculo.ano}',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    'Cor: ${veiculo.cor}',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    'Capacidade: ${veiculo.capacidade} pessoas',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    'Observações: ${veiculo.obsVeiculo}',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Placa: ${veiculo.placa}',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            Text(
-              'Chassi: ${veiculo.chassi}',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            Text(
-              'Ano: ${veiculo.ano}',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            Text(
-              'Cor: ${veiculo.cor}',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            Text(
-              'Capacidade: ${veiculo.capacidade} pessoas',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            Text(
-              'Observações: ${veiculo.obsVeiculo}',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
+
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {

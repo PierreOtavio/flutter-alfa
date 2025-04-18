@@ -42,7 +42,7 @@ class _InicioPageState extends State<InicioPage> {
   Future<void> redirectNotify() async {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NotificacoesGeral()),
+      MaterialPageRoute(builder: (context) => NotifyPage()),
     );
   }
 

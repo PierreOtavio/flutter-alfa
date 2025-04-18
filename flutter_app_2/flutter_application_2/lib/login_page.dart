@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/data/cargo.dart';
 // import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/user.dart';
+import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/goals/globals.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -29,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isLoading = true);
 
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/api/login'),
+        Uri.parse('${AppConfig.baseUrl}/api/login'),
         headers: {'Content-type': 'application/json'},
         body: jsonEncode({
           'cpf': cpfController.text,
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         // Imprima a resposta para depuração
-        print('Resposta: ${response.body}');
+        // print('Resposta: ${response.body}');
 
         final data = jsonDecode(response.body);
 
@@ -100,7 +101,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF1B1C1E),
-
       appBar: AppBar(backgroundColor: Color(0xFF013A65)),
       body: Column(
         children: [

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/solicitar.dart';
+import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/goals/globals.dart';
 // Ensure these imports point to the correct files in your project
 // import 'package:flutter_application_2/data/solicitar.dart';
@@ -38,7 +39,7 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
   // Use 127.0.0.1 for iOS Simulators / Web connecting to localhost
   // Use 10.0.2.2 for Android Emulators connecting to localhost
   // Use your machine's network IP for physical devices on the same network
-  final String _apiUrl = 'http://127.0.0.1:8000/api/solicitar/create';
+  final String _apiUrl = '${AppConfig.baseUrl}/api/solicitar/create';
   // --- End API URL Config ---
 
   bool _isLoading = false;
