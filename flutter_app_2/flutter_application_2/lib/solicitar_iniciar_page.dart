@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/data/veiculo.dart'; // Verifique se seu modelo Veiculo está correto
-import 'package:flutter_application_2/data/marca.dart'; // Importe se Marca for um objeto separado
-import 'package:flutter_application_2/data/modelo.dart'; // Importe se Modelo for um objeto separado
+// import 'package:flutter_application_2/data/marca.dart'; // Importe se Marca for um objeto separado
+// import 'package:flutter_application_2/data/modelo.dart'; // Importe se Modelo for um objeto separado
 import 'package:flutter_application_2/inicio_page.dart'; // Verifique se é a página correta para navegar
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
