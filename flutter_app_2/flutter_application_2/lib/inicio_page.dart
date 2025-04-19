@@ -6,6 +6,8 @@ import 'package:flutter_application_2/veiculo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/goals/globals.dart';
 import 'package:flutter_application_2/solicitados_user.dart';
+import 'package:flutter_application_2/relatorio_page.dart';
+import 'package:flutter/material.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -36,6 +38,13 @@ class _InicioPageState extends State<InicioPage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => VeicSoliPage(veiculo: veiculo)),
+    );
+  }
+
+  Future<void> redirectRelatorio() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RelatorioPage()),
     );
   }
 
@@ -169,50 +178,7 @@ class _InicioPageState extends State<InicioPage> {
 
             const SizedBox(height: 20),
 
-            // Botão 2 - Veículos Solicitados
-            // GestureDetector(
-            //   onTap: () => redirectSolic(),
-            //   child: Container(
-            //     margin: const EdgeInsets.symmetric(horizontal: 5),
-            //     width: 330,
-            //     height: 80,
-            //     alignment: Alignment.centerRight,
-            //     decoration: BoxDecoration(
-            //       color: const Color(0xFF424242),
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //     child: Row(
-            //       crossAxisAlignment: CrossAxisAlignment.center,
-            //       children: [
-            //         IconButton(
-            //           onPressed: () => redirectSolic(),
-            //           icon: const Icon(
-            //             Icons.call_merge_rounded,
-            //             color: Color(0xFFFFFFFF),
-            //             size: 40,
-            //           ),
-            //         ),
-            //         const SizedBox(width: 10),
-            //         const Expanded(
-            //           child: Column(
-            //             mainAxisAlignment: MainAxisAlignment.center,
-            //             crossAxisAlignment: CrossAxisAlignment.center,
-            //             children: [
-            //               Text(
-            //                 'Veículos Solicitados',
-            //                 style: TextStyle(color: Colors.white, fontSize: 25),
-            //                 textAlign: TextAlign.center,
-            //               ),
-            //             ],
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 18),
-
-            // Botão 3 - Ver Solicitações (solicitados_user.dart)
+            // Botão 2 - Ver Solicitações (solicitados_user.dart)
             GestureDetector(
               onTap: () => redirectSolicitadosUser(),
               child: Container(
@@ -221,7 +187,7 @@ class _InicioPageState extends State<InicioPage> {
                 height: 80,
                 alignment: Alignment.centerRight,
                 decoration: BoxDecoration(
-                  color: Color(0xFF424242),
+                  color: const Color(0xFF424242),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -253,6 +219,51 @@ class _InicioPageState extends State<InicioPage> {
                 ),
               ),
             ),
+            
+            const SizedBox(height: 20), // Ajuste de espaço entre os botões
+
+            // Botão 3 - Relatório de Uso
+            GestureDetector(
+              onTap: () => redirectRelatorio(),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 5),
+                width: 330,
+                height: 80,
+                alignment: Alignment.centerRight,
+                decoration: BoxDecoration(
+                  color: Color(0xFF424242),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () => redirectRelatorio(),
+                      icon: const Icon(
+                        Icons.bar_chart,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Relatório de Uso',
+                            style: TextStyle(color: Colors.white, fontSize: 25),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: 80), // espaço para não encobrir o botão
           ],
         ),
