@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
+import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/veicsoli_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_2/data/veiculo.dart';
@@ -30,12 +31,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
   final _secureStorage = const FlutterSecureStorage();
   final String _tokenKey = 'auth_token'; // <-- SUA CHAVE REAL
 
-  final String apiUrl =
-      kIsWeb
-          ? 'http://127.0.0.1:8000/api/veiculos/disponiveis'
-          : Platform.isAndroid
-          ? 'http://10.0.2.2:8000/api/veiculos/disponiveis'
-          : 'http://127.0.0.1:8000/api/veiculos/disponiveis';
+  final String apiUrl = '${AppConfig.baseUrl}/api/veiculos/disponiveis';
 
   @override
   void initState() {

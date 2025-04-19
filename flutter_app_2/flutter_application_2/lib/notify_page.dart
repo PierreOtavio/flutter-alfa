@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/notify_details_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -13,12 +14,14 @@ class Notificacao {
   final String tipo;
   final String mensagem;
   final Map<String, dynamic> detalhes;
+  final Map<String, dynamic> rawJson;
 
   Notificacao({
     required this.id,
     required this.tipo,
     required this.mensagem,
     required this.detalhes,
+    required this.rawJson,
   });
 
   factory Notificacao.fromJson(Map<String, dynamic> json) {
@@ -28,16 +31,29 @@ class Notificacao {
       mensagem: json['data']['mensagem']?.toString() ?? 'Sem mensagem',
       detalhes:
           (json['data']['detalhes'] as Map?)?.cast<String, dynamic>() ?? {},
+      rawJson: json,
     );
   }
 
   String get nomeSolicitante {
+    if (detalhes['user'] != null && detalhes['user']['name'] != null) {
+      return detalhes['user']['name'];
+    }
     final match = RegExp(r'de (.*?)(?=\s|$)').firstMatch(mensagem);
     return match?.group(1) ?? 'Usuário desconhecido';
   }
 
-  String get placaVeiculo =>
-      detalhes['veiculo']?.toString() ?? 'Placa não informada';
+  String get placaVeiculo {
+    if (detalhes['veiculo'] is Map && detalhes['veiculo']['placa'] != null) {
+      return detalhes['veiculo']['placa'];
+    } else if (detalhes['veiculo'] is String) {
+      return detalhes['veiculo'];
+    } else if (detalhes['modelo'] is Map &&
+        detalhes['modelo']['placa'] != null) {
+      return detalhes['modelo']['placa'];
+    }
+    return 'Placa não informada';
+  }
 }
 
 class NotifyPage extends StatefulWidget {
@@ -178,12 +194,22 @@ class _NotifyPageState extends State<NotifyPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    notif.mensagem,
+                    'Placa: ${notif.placaVeiculo}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Solicitante: ${notif.nomeSolicitante}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 15),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    notif.mensagem,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ],
               ),
@@ -192,7 +218,16 @@ class _NotifyPageState extends State<NotifyPage> {
             // Botão Ver Mais
             SizedBox(width: 12),
             ElevatedButton(
-              onPressed: () => _showDetails(context, notif),
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => NotifyDetailsPage(
+                            notificationJson: notif.rawJson,
+                          ),
+                    ),
+                  ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF003366),
                 foregroundColor: Colors.white,
@@ -219,73 +254,5 @@ class _NotifyPageState extends State<NotifyPage> {
       return 'Relatório';
     }
     return 'Ver Mais';
-  }
-
-  void _showDetails(BuildContext context, Notificacao notif) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: Color(0xFF444444),
-            title: Text(
-              'Detalhes #${notif.detalhes['solicitacao_id'] ?? 'N/A'}',
-              style: TextStyle(color: Colors.white),
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildDetailItem('Status:', notif.tipo),
-                  _buildDetailItem('Solicitante:', notif.nomeSolicitante),
-                  _buildDetailItem('Placa:', notif.placaVeiculo),
-                  _buildDetailItem(
-                    'Data Início:',
-                    notif.detalhes['data_inicio']?.toString(),
-                  ),
-                  if (notif.detalhes['motivo_recusa'] != null)
-                    _buildDetailItem(
-                      'Motivo Recusa:',
-                      notif.detalhes['motivo_recusa']?.toString(),
-                    ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'FECHAR',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
-  Widget _buildDetailItem(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(value ?? 'N/A', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
   }
 }

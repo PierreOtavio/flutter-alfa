@@ -111,10 +111,10 @@ class _SolicitadosUserState extends State<SolicitadosUser> {
   Widget verifyCargo(User? instance) {
     dynamic appBar;
     if (instance!.cargo.nome == 'Adm') {
-      appBar = CustomAppBar(title: 'Solicitações de todos os Usuários');
+      appBar = CustomAppBar(title: 'Solicitações');
       return appBar;
     } else {
-      appBar = CustomAppBar(title: 'Solicitações aceitas');
+      appBar = CustomAppBar(title: 'Minhas solicitações');
       return appBar;
     }
   }

@@ -1,3 +1,4 @@
+// solicitar finalizar Page:
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -156,7 +157,7 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
       // Backend espera 'placa_confirmar'
       'placa_confirmar': _placaController.text.trim(),
       // Backend espera 'km_velocimetro' para o KM final
-      'km_velocimetro': int.parse(_kmFinalController.text.trim()),
+      'km_final': int.parse(_kmFinalController.text.trim()),
       // Backend espera 'obs_users'
       'obs_users':
           _obsController.text.trim().isEmpty

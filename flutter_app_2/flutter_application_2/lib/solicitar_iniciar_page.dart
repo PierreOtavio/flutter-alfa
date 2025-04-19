@@ -1,3 +1,4 @@
+// solicitar iniciar Page
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -143,7 +144,7 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
     );
     final body = jsonEncode({
       'placa_confirmar': widget.veiculo.placa,
-      'km_velocimetro': int.parse(
+      'km_inicio': int.parse(
         _kmController.text.trim(),
       ), // Backend espera km_velocimetro aqui
     });
