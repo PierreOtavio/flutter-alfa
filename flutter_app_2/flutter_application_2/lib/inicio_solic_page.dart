@@ -9,7 +9,7 @@ import 'package:flutter_application_2/data/veiculo.dart'; // Importa Modelo Veic
 import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/notify_details_page.dart'; // Importa detalhes da notificação
 import 'package:flutter_application_2/goals/globals.dart'; // Importa globals para 'instance'
-import 'package:flutter_application_2/data/user.dart'; // Importa User para checar 'instance'
+// import 'package:flutter_application_2/data/user.dart'; // Importa User para checar 'instance'
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -43,7 +43,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
   // --- CORES PARA OS ESTADOS DOS BOTÕES ---
   static const Color _buttonEnabledBgColor = Color(0xFF013A65);
   static const Color _buttonEnabledFgColor = Colors.white;
-  static final Color _buttonDisabledBgColor = Colors.blue.shade100;
+  static final Color _buttonDisabledBgColor = Color(0xFF424242);
   static final Color _buttonDisabledFgColor = Colors.grey.shade700;
 
   @override
@@ -466,7 +466,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                               child: Text(
                                 'KM Inicial Registrado: $_kmInicialConfirmado km',
                                 style: const TextStyle(
-                                  color: Colors.cyanAccent,
+                                  color: Colors.white24,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),

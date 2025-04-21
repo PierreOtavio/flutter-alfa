@@ -3,58 +3,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
+import 'package:flutter_application_2/data/notificacao.dart';
 import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/notify_details_page.dart';
+import 'package:flutter_application_2/relatorio_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
-class Notificacao {
-  final String id;
-  final String tipo;
-  final String mensagem;
-  final Map<String, dynamic> detalhes;
-  final Map<String, dynamic> rawJson;
-
-  Notificacao({
-    required this.id,
-    required this.tipo,
-    required this.mensagem,
-    required this.detalhes,
-    required this.rawJson,
-  });
-
-  factory Notificacao.fromJson(Map<String, dynamic> json) {
-    return Notificacao(
-      id: json['id'].toString(),
-      tipo: json['data']['tipo']?.toString() ?? 'Sem tipo',
-      mensagem: json['data']['mensagem']?.toString() ?? 'Sem mensagem',
-      detalhes:
-          (json['data']['detalhes'] as Map?)?.cast<String, dynamic>() ?? {},
-      rawJson: json,
-    );
-  }
-
-  String get nomeSolicitante {
-    if (detalhes['user'] != null && detalhes['user']['name'] != null) {
-      return detalhes['user']['name'];
-    }
-    final match = RegExp(r'de (.*?)(?=\s|$)').firstMatch(mensagem);
-    return match?.group(1) ?? 'Usuário desconhecido';
-  }
-
-  String get placaVeiculo {
-    if (detalhes['veiculo'] is Map && detalhes['veiculo']['placa'] != null) {
-      return detalhes['veiculo']['placa'];
-    } else if (detalhes['veiculo'] is String) {
-      return detalhes['veiculo'];
-    } else if (detalhes['modelo'] is Map &&
-        detalhes['modelo']['placa'] != null) {
-      return detalhes['modelo']['placa'];
-    }
-    return 'Placa não informada';
-  }
-}
 
 class NotifyPage extends StatefulWidget {
   const NotifyPage({super.key});
@@ -203,7 +158,7 @@ class _NotifyPageState extends State<NotifyPage> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Solicitante: ${notif.nomeSolicitante}',
+                    _getSolicitante(notif.detalhes),
                     style: const TextStyle(color: Colors.white70, fontSize: 15),
                   ),
                   SizedBox(height: 8),
@@ -218,8 +173,14 @@ class _NotifyPageState extends State<NotifyPage> {
             // Botão Ver Mais
             SizedBox(width: 12),
             ElevatedButton(
-              onPressed:
-                  () => Navigator.push(
+              onPressed: () async {
+                if (_getButtonText(notif) == 'Relatório') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RelatorioPage()),
+                  );
+                } else if (_getButtonText(notif) == 'Ver Mais') {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
@@ -227,7 +188,9 @@ class _NotifyPageState extends State<NotifyPage> {
                             notificationJson: notif.rawJson,
                           ),
                     ),
-                  ),
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF003366),
                 foregroundColor: Colors.white,
@@ -237,6 +200,7 @@ class _NotifyPageState extends State<NotifyPage> {
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               ),
               child: Text(
+                // if(_getButtonText(notif) == 'Relatório')
                 _getButtonText(notif),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
@@ -248,11 +212,24 @@ class _NotifyPageState extends State<NotifyPage> {
   }
 
   String _getButtonText(Notificacao notif) {
-    if (notif.tipo.contains('concluida') ||
-        notif.mensagem.contains('concluída') ||
-        notif.mensagem.contains('rodou')) {
+    if (notif.tipo.contains('viagem_concluida_admin')) {
       return 'Relatório';
+    } else {
+      return 'Ver Mais';
     }
-    return 'Ver Mais';
+  }
+
+  String _getSolicitante(detalhes) {
+    if (detalhes == null || detalhes['user'] == null) {
+      return 'Informação indisponível';
+    }
+    final cargoId = detalhes['user']['cargo_id'];
+    final nome = detalhes['user']['name'] ?? 'Desconhecido';
+    if (cargoId == 1) {
+      return 'Aprovador: $nome';
+    } else if (cargoId == 2) {
+      return 'Solicitante: $nome';
+    }
+    return 'Usuário desconhecido';
   }
 }

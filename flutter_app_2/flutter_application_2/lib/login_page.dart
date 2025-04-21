@@ -79,6 +79,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (data.containsKey('token')) {
           final token = data['token'];
+          print('Token recebido: $token');
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
           Navigator.pushReplacement(
@@ -200,11 +201,9 @@ class _LoginPageState extends State<LoginPage> {
                     controller: passwordController,
                     obscureText: !_passwordvisible,
                     decoration: InputDecoration(
-                      // labelText: "Senha",
                       hintText: "Senha",
                       hintStyle: TextStyle(color: Color(0xFF8F8F96)),
                       prefixIcon: Icon(Icons.lock, color: Color(0xFFC7C7CF)),
-                      // labelStyle: TextStyle(color: Color(0xFFC7C7CF)),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _passwordvisible
