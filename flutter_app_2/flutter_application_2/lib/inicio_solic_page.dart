@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart'; // PlatformException não está sendo capturada aqui
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/components/qr_code_scan.dart';
-// import 'package:flutter_application_2/components/qr_code_scan.dart'; // Importa Scanner
 import 'package:flutter_application_2/solicitar_finalizar_page.dart'; // Importa Finalizar
-// >>> ADICIONAR SE NECESSÁRIO PARA O FLUXO DO QR CODE <<<
-import 'package:flutter_application_2/solicitar_iniciar_page.dart';
 import 'package:flutter_application_2/data/veiculo.dart'; // Importa Modelo Veiculo
 import 'package:flutter_application_2/goals/config.dart';
-import 'package:flutter_application_2/notify_page.dart';
+import 'package:flutter_application_2/notify_details_page.dart'; // Importa detalhes da notificação
+import 'package:flutter_application_2/goals/globals.dart'; // Importa globals para 'instance'
+import 'package:flutter_application_2/data/user.dart'; // Importa User para checar 'instance'
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -26,7 +25,7 @@ class InicioSolicPage extends StatefulWidget {
 }
 
 class _InicioSolicPageState extends State<InicioSolicPage> {
-  bool isLoading = true;
+  bool isLoading = true; // Começa carregando
   final _secureStorage = const FlutterSecureStorage();
   final String _tokenKey = 'auth_token';
 
@@ -44,43 +43,74 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
   // --- CORES PARA OS ESTADOS DOS BOTÕES ---
   static const Color _buttonEnabledBgColor = Color(0xFF013A65);
   static const Color _buttonEnabledFgColor = Colors.white;
-  // MUDANÇA: Cores para o botão DESABILITADO
-  static final Color _buttonDisabledBgColor =
-      Colors.blue.shade100; // Azul claro
-  static final Color _buttonDisabledFgColor =
-      Colors.grey.shade700; // Cinza escuro para texto
+  static final Color _buttonDisabledBgColor = Colors.blue.shade100;
+  static final Color _buttonDisabledFgColor = Colors.grey.shade700;
 
   @override
   void initState() {
     super.initState();
-    getSolicByID(widget.solicitacaoID);
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    if (!mounted) return;
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      solicitacaoDetalhes = null;
+    });
+
+    if (instance == null) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+        errorMessage =
+            "Erro crítico: Informações do usuário não carregadas. Tente fazer login novamente.";
+      });
+      if (kDebugMode) {
+        print(
+          "Falha ao carregar dados iniciais: Instância global 'instance' é nula.",
+        );
+      }
+      return;
+    }
+
+    if (kDebugMode) {
+      print(
+        "Instância do usuário encontrada: ID=${instance!.id}, CargoID=${instance!.cargo.id}",
+      );
+    }
+    await getSolicByID(widget.solicitacaoID);
   }
 
   Future<String?> _getToken() async {
-    try {
-      if (kIsWeb) {
+    if (kIsWeb) {
+      try {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString(_tokenKey);
-        if (kDebugMode) {
-          print(
-            'Token lido do SharedPreferences (Web): ${token != null ? "Encontrado" : "NÃO encontrado"}',
-          );
-        }
+        // if (kDebugMode) {
+        //   print(
+        //     "Token lido do SharedPreferences (Web): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
+        //   );
+        // }
         return token;
-      } else {
+      } catch (e) {
+        if (kDebugMode) print("Erro ao ler SharedPreferences na Web: $e");
+        return null;
+      }
+    } else {
+      try {
         final token = await _secureStorage.read(key: _tokenKey);
-        if (kDebugMode) {
-          print(
-            'Token lido do SecureStorage (Mobile): ${token != null ? "Encontrado" : "NÃO encontrado"}',
-          );
-        }
+        // if (kDebugMode) {
+        //   print(
+        //     "Token lido do Secure Storage (Mobile): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
+        //   );
+        // }
         return token;
+      } catch (e) {
+        if (kDebugMode) print("Erro ao ler token do Secure Storage: $e");
+        return null;
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print("Erro ao ler token: $e");
-      }
-      return null;
     }
   }
 
@@ -90,9 +120,12 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
       print("Iniciando getSolicByID para ID: $id");
     }
     setState(() {
-      isLoading = true;
-      errorMessage = null;
+      solicitacaoDetalhes = null;
       _kmInicialConfirmado = null;
+      _viagemIniciada = false;
+      _viagemFinalizada = false;
+      _situacao = 'pendente';
+      // Mantém isLoading = true até o fim ou erro
     });
 
     final token = await _getToken();
@@ -100,7 +133,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
       if (!mounted) return;
       setState(() {
         isLoading = false;
-        errorMessage = 'Erro: Usuário não autenticado.';
+        errorMessage = 'Erro: Usuário não autenticado (token ausente).';
       });
       if (kDebugMode) {
         print("Falha em getSolicByID: Token nulo.");
@@ -119,18 +152,11 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
           )
           .timeout(const Duration(seconds: 20));
 
-      if (kDebugMode) {
-        print(
-          "Resposta da API GET /api/solicitar/$id - Status: ${response.statusCode}",
-        );
-      }
+      // if (kDebugMode) {
+      //   print("Resposta da API GET /api/solicitar/$id - Status: ${response.statusCode}");
+      // }
 
-      if (!mounted) {
-        if (kDebugMode) {
-          print("Widget desmontado após chamada API.");
-        }
-        return;
-      }
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -148,11 +174,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
           final histVeiculo =
               solicitacao['hist_veiculo'] as Map<String, dynamic>;
           final kmInicioRaw = histVeiculo['km_inicio'];
-          if (kDebugMode) {
-            print(
-              "Encontrado 'hist_veiculo'. km_inicio raw: $kmInicioRaw (Tipo: ${kmInicioRaw?.runtimeType})",
-            );
-          }
           if (kmInicioRaw is int) {
             kmInicialTemp = kmInicioRaw;
           } else if (kmInicioRaw is String) {
@@ -167,25 +188,14 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
               historicoTemp != null &&
               historicoTemp['data_inicio'] != null &&
               historicoTemp['data_inicio'].isNotEmpty;
-
           if (kmInicialTemp == 0 && !viagemIniciadaTemp) {
             kmInicialTemp = null;
-            if (kDebugMode)
-              print("KM Inicial era 0 antes do início, tratando como null.");
           }
-        } else {
-          if (kDebugMode) {
-            print("'hist_veiculo' NÃO encontrado ou inválido.");
-          }
-        }
-        if (kDebugMode) {
-          print("KM Inicial processado: $kmInicialTemp");
         }
 
         setState(() {
           solicitacaoDetalhes = solicitacao;
           _kmInicialConfirmado = kmInicialTemp;
-
           dataPrevPegar = _parseDate(
             solicitacao['prev_data_inicio'] as String?,
           );
@@ -195,7 +205,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
           horaInicial = _parseTime(solicitacao['prev_hora_inicio'] as String?);
           horaFinal = _parseTime(solicitacao['prev_hora_final'] as String?);
           _situacao = solicitacao['situacao'] as String? ?? 'desconhecida';
-
           final historico = solicitacao['historico'] as Map<String, dynamic>?;
           _viagemIniciada =
               historico != null &&
@@ -207,12 +216,9 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
               historico['data_final'].isNotEmpty;
 
           isLoading = false;
+          errorMessage = null;
         });
-        if (kDebugMode) {
-          print(
-            "Estado atualizado. Viagem Iniciada: $_viagemIniciada, Finalizada: $_viagemFinalizada, KM Inicial Confirmado: $_kmInicialConfirmado",
-          );
-        }
+        // if (kDebugMode) { print("Estado atualizado com sucesso."); }
       } else {
         String errorMsg = 'Erro desconhecido';
         try {
@@ -226,19 +232,17 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
         setState(() {
           isLoading = false;
           errorMessage = errorMsg;
+          solicitacaoDetalhes = null;
         });
-        if (kDebugMode) {
-          print("Erro ao buscar solicitação $id: $errorMessage");
-        }
+        if (kDebugMode) print("Erro ao buscar solicitação $id: $errorMessage");
       }
     } catch (e, stacktrace) {
       if (!mounted) return;
-      if (kDebugMode) {
-        print('Erro em getSolicByID para $id: $e\n$stacktrace');
-      }
+      if (kDebugMode) print('Erro em getSolicByID para $id: $e\n$stacktrace');
       setState(() {
         isLoading = false;
         errorMessage = 'Erro de conexão ou inesperado: ${e.runtimeType}';
+        solicitacaoDetalhes = null;
       });
     }
   }
@@ -248,9 +252,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
     try {
       return DateTime.parse(dateString);
     } catch (e) {
-      if (kDebugMode) {
-        print("Erro ao parsear data: $dateString - $e");
-      }
       return null;
     }
   }
@@ -268,18 +269,12 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print("Erro ao parsear hora: $timeString - $e");
-      }
       return null;
     }
   }
 
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-    if (kDebugMode) {
-      print("Exibindo SnackBar de erro: $message");
-    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
     );
@@ -287,9 +282,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
 
   void _showSuccessSnackBar(String message) {
     if (!mounted) return;
-    if (kDebugMode) {
-      print("Exibindo SnackBar de sucesso: $message");
-    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
@@ -297,7 +289,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
 
   @override
   Widget build(BuildContext context) {
-    String textoSituacao = 'Situação: Desconhecida';
+    String textoSituacao = 'Situação: Carregando...';
     if (!isLoading && errorMessage == null && solicitacaoDetalhes != null) {
       textoSituacao =
           'Situação: ${_situacao[0].toUpperCase()}${_situacao.substring(1)}';
@@ -305,9 +297,15 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
         textoSituacao = 'Situação: Em Andamento';
       } else if (_situacao == 'aceita' && !_viagemIniciada) {
         textoSituacao = 'Situação: Aceita (Aguardando Início)';
-      } else if (_situacao == 'concluída') {
+      } else if (_situacao == 'concluída' || _situacao == 'finalizada') {
         textoSituacao = 'Situação: Concluída';
+      } else if (_situacao == 'recusada') {
+        textoSituacao = 'Situação: Recusada';
+      } else if (_situacao == 'pendente') {
+        textoSituacao = 'Situação: Pendente';
       }
+    } else if (!isLoading && errorMessage != null) {
+      textoSituacao = 'Situação: Erro ao carregar';
     }
 
     return Scaffold(
@@ -333,14 +331,13 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        onPressed: () => getSolicByID(widget.solicitacaoID),
-                        icon: Icon(Icons.refresh),
-                        label: Text("Tentar Novamente"),
+                        onPressed: _loadInitialData,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text("Tentar Novamente"),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _buttonEnabledBgColor, // Usa cor habilitada
+                          backgroundColor: _buttonEnabledBgColor,
                           foregroundColor: _buttonEnabledFgColor,
                         ),
                       ),
@@ -351,7 +348,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
               : solicitacaoDetalhes == null
               ? Center(
                 child: Text(
-                  'Nenhuma informação disponível.',
+                  'Nenhuma informação disponível para esta solicitação.',
                   style: TextStyle(color: Colors.white70),
                   textAlign: TextAlign.center,
                 ),
@@ -379,16 +376,16 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                             children: [
                               Text(
                                 'Veículo: ${solicitacaoDetalhes!['veiculo']['placa'] ?? 'N/A'}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Text(
                                 '${solicitacaoDetalhes!['veiculo']['marca']?['marca'] ?? ''} ${solicitacaoDetalhes!['veiculo']['modelo']?['modelo'] ?? ''}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
                                 ),
@@ -445,9 +442,14 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                                 ),
                               ),
                             ),
-                          situacaoCard(_situacao, textoSituacao),
+                          situacaoCard(
+                            _situacao,
+                            textoSituacao,
+                          ), // Card de Situação
                           if (_situacao == 'recusada' &&
-                              solicitacaoDetalhes!['motivo_recusa'] != null)
+                              solicitacaoDetalhes!['motivo_recusa'] != null &&
+                              (solicitacaoDetalhes!['motivo_recusa'] as String)
+                                  .isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
@@ -478,7 +480,10 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                 ),
               ),
       persistentFooterButtons:
-          isLoading || solicitacaoDetalhes == null
+          isLoading ||
+                  errorMessage != null ||
+                  solicitacaoDetalhes == null ||
+                  instance == null
               ? null
               : [_buildActionButtons(solicitacaoDetalhes)],
     );
@@ -493,16 +498,20 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
         iconData = Icons.hourglass_empty;
         break;
       case 'aceita':
+        bool viagemEmAndamento = _viagemIniciada && !_viagemFinalizada;
         backgroundColor =
-            _viagemIniciada ? Colors.blue[700]! : Colors.green[700]!;
+            viagemEmAndamento ? Colors.blue[700]! : Colors.green[700]!;
         iconData =
-            _viagemIniciada ? Icons.directions_car : Icons.check_circle_outline;
+            viagemEmAndamento
+                ? Icons.directions_car
+                : Icons.check_circle_outline;
         break;
       case 'recusada':
         backgroundColor = Colors.red[700]!;
         iconData = Icons.cancel_outlined;
         break;
       case 'concluída':
+      case 'finalizada':
         backgroundColor = Colors.grey[700]!;
         iconData = Icons.check_circle;
         break;
@@ -510,7 +519,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
         backgroundColor = Colors.grey[700]!;
         iconData = Icons.help_outline;
     }
-
     return Card(
       color: backgroundColor,
       elevation: 2,
@@ -538,189 +546,297 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
     );
   }
 
+  // >>> VERSÃO CORRIGIDA: Função _buildActionButtons com lógica para Admin dono <<<
   Widget _buildActionButtons(Map<String, dynamic>? detalhes) {
-    if (detalhes == null) return const SizedBox.shrink();
+    // Validações iniciais
+    if (detalhes == null || instance == null) {
+      if (kDebugMode)
+        print(
+          "Botões não renderizados: Detalhes ou instância global ausentes.",
+        );
+      return const SizedBox.shrink();
+    }
 
-    final int? cargoId = detalhes['user']?['cargo_id'];
-    Widget buttonsContent;
+    // Pega ID e Cargo da instância global
+    final int loggedInUserId = instance!.id;
+    // >>> IMPORTANTE: Verifique se o acesso ao ID do cargo está correto <<<
+    final int loggedInUserCargoId =
+        instance!.cargo.id; // Ou instance!.cargo_id;
 
-    if (cargoId == 1) {
-      // Botão Admin
-      if (_situacao == 'pendente') {
-        buttonsContent = ElevatedButton.icon(
-          onPressed:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotifyPage()),
-              ).then((_) {
-                if (kDebugMode)
-                  print("Retornou da tela de avaliação, atualizando...");
-                getSolicByID(widget.solicitacaoID);
-              }),
+    // Obtém o ID do criador da solicitação
+    final int? creatorUserId = detalhes['user']?['id'];
+    if (creatorUserId == null) {
+      if (kDebugMode)
+        print(
+          "Botões não renderizados: ID do criador da solicitação ausente nos detalhes.",
+        );
+      return const SizedBox.shrink();
+    }
+
+    final bool isOwner = (loggedInUserId == creatorUserId);
+    List<Widget> buttonsList = []; // Lista para acumular os botões
+
+    // if (kDebugMode) {
+    //    print("Verificando botões: LoggedInUserID: $loggedInUserId, CreatorUserID: $creatorUserId, IsOwner: $isOwner, LoggedInUserCargoID: $loggedInUserCargoId, Situação: $_situacao");
+    // }
+
+    // 1. Botão de Avaliar (Exclusivo para Admin e situação pendente)
+    if (loggedInUserCargoId == 1 && _situacao == 'pendente') {
+      buttonsList.add(
+        ElevatedButton.icon(
+          onPressed: () {
+            if (kDebugMode)
+              print(
+                "Admin: Adaptando dados e navegando para NotifyDetailsPage",
+              );
+
+            if (detalhes == null) {
+              _showErrorSnackBar(
+                "Erro: Dados da solicitação indisponíveis para navegação.",
+              );
+              if (kDebugMode)
+                print(
+                  "Falha ao navegar: 'detalhes' (solicitacaoDetalhes do state) é nulo.",
+                );
+              return;
+            }
+
+            // 2. Cria o Mapa "Wrapper" e o mapa INTERNO 'detalhes' com as chaves CORRETAS
+            final Map<String, dynamic> detalhesAdaptados = {
+              // Copia outros campos que NotifyDetailsPage possa precisar de dentro dos detalhes
+              'user': detalhes['user'],
+              'veiculo': detalhes['veiculo'],
+              'situacao': detalhes['situacao'], // Passa a situação atual
+              'motivo': detalhes['motivo'], // Passa o motivo original
+              // >>> MAPEAMENTO DAS CHAVES DE DATA/HORA <<<
+              'data_inicio':
+                  detalhes['prev_data_inicio'], // Usa a chave esperada pela NotifyDetailsPage
+              'data_final': detalhes['prev_data_final'], // Usa a chave esperada
+              'hora_inicio':
+                  detalhes['prev_hora_inicio'], // Usa a chave esperada
+              'hora_final': detalhes['prev_hora_final'], // Usa a chave esperada
+              // Adicione aqui quaisquer outros campos do mapa 'detalhes' original
+              // que a NotifyDetailsPage possa tentar acessar dentro de ['data']['detalhes']
+              // Ex: 'id_solicitacao': detalhes['id'], // Se ela precisar do ID dentro dos detalhes também
+            };
+
+            final Map<String, dynamic> dadosParaNotificacao = {
+              'data': {
+                'solicitacao_id':
+                    widget.solicitacaoID, // ID principal para a API
+                'detalhes':
+                    detalhesAdaptados, // Passa o mapa com chaves renomeadas
+                'mensagem':
+                    detalhes['motivo'] ??
+                    'Avaliar solicitação pendente.', // Mensagem principal
+                'tipo': 'solicitacao_veiculo', // Tipo
+              },
+              // Adicione aqui o 'id' da notificação simulado se NotifyDetailsPage precisar dele no nível raiz
+              // 'id': widget.solicitacaoID.toString(),
+            };
+
+            // Debug: Imprimir o mapa que será passado
+            if (kDebugMode) {
+              print(
+                "Dados adaptados para NotifyDetailsPage: ${jsonEncode(dadosParaNotificacao)}",
+              );
+            }
+
+            // 3. Navega passando o mapa adaptado
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => NotifyDetailsPage(
+                      notificationJson: dadosParaNotificacao,
+                    ), // Passa o mapa adaptado
+              ),
+            ).then((_) {
+              if (kDebugMode)
+                print("Retornou da tela de detalhes/avaliação, atualizando...");
+              getSolicByID(widget.solicitacaoID); // Atualiza ao retornar
+            });
+          },
           style: ElevatedButton.styleFrom(
-            backgroundColor: _buttonEnabledBgColor, // Cor Habilitado
+            backgroundColor: _buttonEnabledBgColor,
             foregroundColor: _buttonEnabledFgColor,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            minimumSize: Size(double.infinity, 50),
+            minimumSize: const Size(double.infinity, 50),
           ),
           icon: const Icon(Icons.notification_important, color: Colors.white),
           label: const Text(
             'Avaliar Solicitação',
             style: TextStyle(fontSize: 18, color: Colors.white),
           ),
-        );
-      } else {
-        buttonsContent = const SizedBox.shrink();
-      }
-    } else if (cargoId == 2) {
-      // Botões Motorista
-      bool podeIniciar = _situacao == 'aceita' && !_viagemIniciada;
-      bool podeFinalizar =
-          _situacao == 'aceita' && _viagemIniciada && !_viagemFinalizada;
-      Veiculo? veiculoParaAcao;
-      if (detalhes['veiculo'] != null && detalhes['veiculo'] is Map) {
-        try {
-          veiculoParaAcao = Veiculo.fromJson(
-            detalhes['veiculo'] as Map<String, dynamic>,
-          );
-        } catch (e) {
-          if (kDebugMode) print("Erro ao reconstruir Veiculo: $e");
-        }
-      }
-      final int? kmInicial = _kmInicialConfirmado;
-
-      buttonsContent = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // --- Botão Iniciar ---
-          ElevatedButton.icon(
-            icon: const Icon(Icons.qr_code_scanner, size: 20),
-            label: const Text(
-              'Iniciar Viagem (Ler QR Code)',
-              style: TextStyle(fontSize: 17),
-            ),
-            style: ElevatedButton.styleFrom(
-              // Cores baseadas se está habilitado ou não
-              backgroundColor: _buttonEnabledBgColor, // Cor quando habilitado
-              foregroundColor: _buttonEnabledFgColor, // Cor do texto habilitado
-              // MUDANÇA: Cores específicas para DESABILITADO
-              disabledBackgroundColor: _buttonDisabledBgColor,
-              disabledForegroundColor: _buttonDisabledFgColor,
-              // --- Fim da Mudança ---
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            // Define onPressed como null se não pode iniciar (desabilita o botão)
-            onPressed:
-                !podeIniciar
-                    ? null
-                    : () {
-                      if (veiculoParaAcao == null) {
-                        _showErrorSnackBar(
-                          'Erro: Dados do veículo indisponíveis.',
-                        );
-                        return;
-                      }
-                      if (kDebugMode) print("Navegando para Iniciar...");
-                      // Navega para Iniciar (simplificado, assumindo que IniciarPage existe)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => QRCodeScannerPage(
-                                // veiculo: veiculoParaAcao!,
-                                // solicitacaoId: widget.solicitacaoID,
-                                // isUrgent: false,
-                              ),
-                        ),
-                      ).then((success) {
-                        if (kDebugMode)
-                          print(
-                            "Retornou após fluxo de início. Atualizando...",
-                          );
-                        getSolicByID(widget.solicitacaoID);
-                        if (success == true)
-                          _showSuccessSnackBar("Viagem iniciada!");
-                      });
-                    },
-          ),
-          const SizedBox(height: 12),
-          // --- Botão Finalizar ---
-          ElevatedButton.icon(
-            icon: const Icon(Icons.check_circle_outline, size: 20),
-            label: const Text(
-              'Finalizar Viagem',
-              style: TextStyle(fontSize: 17),
-            ),
-            style: ElevatedButton.styleFrom(
-              // Cores baseadas se está habilitado ou não
-              backgroundColor: _buttonEnabledBgColor, // Cor quando habilitado
-              foregroundColor: _buttonEnabledFgColor, // Cor do texto habilitado
-              // MUDANÇA: Cores específicas para DESABILITADO
-              disabledBackgroundColor: _buttonDisabledBgColor,
-              disabledForegroundColor: _buttonDisabledFgColor,
-              // --- Fim da Mudança ---
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            // Define onPressed como null se não pode finalizar (desabilita o botão)
-            onPressed:
-                !podeFinalizar
-                    ? null
-                    : () {
-                      if (veiculoParaAcao == null) {
-                        _showErrorSnackBar(
-                          'Erro: Dados do veículo indisponíveis.',
-                        );
-                        return;
-                      }
-                      if (kmInicial == null) {
-                        _showErrorSnackBar('Erro: KM inicial não carregado.');
-                        if (kDebugMode)
-                          print("ALERTA: kmInicial null ao finalizar.");
-                        return;
-                      }
-                      if (kDebugMode)
-                        print("Navegando para Finalizar com KM: $kmInicial");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => SolicitarFinalizarPage(
-                                solicitacaoId: widget.solicitacaoID,
-                                veiculo: veiculoParaAcao!,
-                                kmInicial: kmInicial,
-                              ),
-                        ),
-                      ).then((success) {
-                        if (kDebugMode)
-                          print(
-                            "Retornou após fluxo de finalizar. Atualizando...",
-                          );
-                        getSolicByID(widget.solicitacaoID);
-                        if (success == true)
-                          _showSuccessSnackBar("Viagem finalizada!");
-                      });
-                    },
-          ),
-        ],
+        ),
       );
-    } else {
-      buttonsContent = const SizedBox.shrink();
     }
 
-    // Adiciona Padding em volta do conteúdo dos botões
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: buttonsContent,
-    );
+    // 2. Botões de Iniciar/Finalizar (Para o DONO da solicitação, INDEPENDENTE do cargo, se situação for 'aceita')
+    if (isOwner && _situacao == 'aceita') {
+      bool podeIniciar =
+          !_viagemIniciada; // Se está 'aceita' e não iniciada, pode iniciar
+      bool podeFinalizar =
+          _viagemIniciada &&
+          !_viagemFinalizada; // Se está iniciada e não finalizada, pode finalizar
+
+      if (podeIniciar || podeFinalizar) {
+        // Só adiciona a coluna se houver alguma ação de motorista possível
+        Veiculo? veiculoParaAcao;
+        if (detalhes['veiculo'] != null && detalhes['veiculo'] is Map) {
+          try {
+            veiculoParaAcao = Veiculo.fromJson(
+              detalhes['veiculo'] as Map<String, dynamic>,
+            );
+          } catch (e) {
+            if (kDebugMode) print("Erro ao parsear veiculo para botões: $e");
+          }
+        }
+        final int? kmInicial = _kmInicialConfirmado;
+
+        // Adiciona espaçamento se o botão de avaliar já foi adicionado
+        if (buttonsList.isNotEmpty) {
+          buttonsList.add(const SizedBox(height: 12));
+        }
+
+        // Adiciona a coluna com os botões de motorista
+        buttonsList.add(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Botão Iniciar
+              ElevatedButton.icon(
+                icon: const Icon(Icons.qr_code_scanner, size: 20),
+                label: const Text(
+                  'Iniciar Viagem (Ler QR Code)',
+                  style: TextStyle(fontSize: 17),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _buttonEnabledBgColor,
+                  foregroundColor: _buttonEnabledFgColor,
+                  disabledBackgroundColor: _buttonDisabledBgColor,
+                  disabledForegroundColor: _buttonDisabledFgColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed:
+                    !podeIniciar
+                        ? null
+                        : () {
+                          if (veiculoParaAcao == null) {
+                            _showErrorSnackBar(
+                              'Erro: Dados do veículo indisponíveis.',
+                            );
+                            return;
+                          }
+                          if (kDebugMode)
+                            print(
+                              "Dono (User ou Admin): Navegando para QRCodeScannerPage (Iniciar)",
+                            );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => QRCodeScannerPage(
+                                    /* Passe os parâmetros necessários aqui */
+                                  ),
+                            ),
+                          ).then((_) {
+                            getSolicByID(widget.solicitacaoID);
+                          }); // Atualiza
+                        },
+              ),
+              const SizedBox(height: 12),
+              // Botão Finalizar
+              ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle_outline, size: 20),
+                label: const Text(
+                  'Finalizar Viagem',
+                  style: TextStyle(fontSize: 17),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _buttonEnabledBgColor,
+                  foregroundColor: _buttonEnabledFgColor,
+                  disabledBackgroundColor: _buttonDisabledBgColor,
+                  disabledForegroundColor: _buttonDisabledFgColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed:
+                    !podeFinalizar
+                        ? null
+                        : () {
+                          if (veiculoParaAcao == null) {
+                            _showErrorSnackBar(
+                              'Erro: Dados do veículo indisponíveis.',
+                            );
+                            return;
+                          }
+                          if (kmInicial == null && _viagemIniciada) {
+                            _showErrorSnackBar(
+                              'Erro: KM inicial não carregado para finalizar.',
+                            );
+                            getSolicByID(widget.solicitacaoID);
+                            return;
+                          }
+                          if (kDebugMode)
+                            print(
+                              "Dono (User ou Admin): Navegando para Finalizar com KM: ${kmInicial ?? 'N/A'}",
+                            );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => SolicitarFinalizarPage(
+                                    solicitacaoId: widget.solicitacaoID,
+                                    veiculo: veiculoParaAcao!,
+                                    kmInicial: kmInicial ?? 0,
+                                  ),
+                            ),
+                          ).then((success) {
+                            getSolicByID(widget.solicitacaoID); // Atualiza
+                            if (success == true)
+                              _showSuccessSnackBar("Viagem finalizada!");
+                          });
+                        },
+              ),
+            ],
+          ),
+        );
+      } else {
+        if (kDebugMode)
+          print(
+            "Dono (User ou Admin): Sem ações de motorista possíveis no momento (Situação: $_situacao, Iniciada: $_viagemIniciada)",
+          );
+      }
+    } else if (isOwner && _situacao != 'aceita') {
+      if (kDebugMode)
+        print(
+          "Dono (User ou Admin): Situação '$_situacao' não permite ações de motorista.",
+        );
+    }
+
+    // Retorna os botões acumulados ou vazio
+    if (buttonsList.isEmpty) {
+      if (kDebugMode) print("Nenhum botão de ação aplicável.");
+      return const SizedBox.shrink();
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: buttonsList,
+        ),
+      );
+    }
   }
 }
