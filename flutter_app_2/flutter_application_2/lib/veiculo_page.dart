@@ -358,8 +358,11 @@ class _VeiculoPageState extends State<VeiculoPage> {
             if (message.contains("Autenticação necessária") ||
                 message.contains("Sessão expirada"))
               ElevatedButton.icon(
-                icon: const Icon(Icons.refresh),
-                label: const Text("Tentar Novamente"),
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                label: const Text(
+                  "Tentar Novamente",
+                  style: TextStyle(color: Colors.white, fontSize: 19.8),
+                ),
                 onPressed: getVeiculos,
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               ),

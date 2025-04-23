@@ -124,7 +124,11 @@ class _InicioPageState extends State<InicioPage> {
                   const SizedBox(width: 40),
                   IconButton(
                     onPressed: () => logout(context),
-                    icon: const Icon(Icons.logout, color: Colors.white),
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 40,
+                    ),
                   ),
                 ],
               ),
@@ -219,9 +223,8 @@ class _InicioPageState extends State<InicioPage> {
                 ),
               ),
             ),
-            
-            const SizedBox(height: 20), // Ajuste de espaço entre os botões
 
+            const SizedBox(height: 20), // Ajuste de espaço entre os botões
             // Botão 3 - Relatório de Uso
             GestureDetector(
               onTap: () => redirectRelatorio(),
