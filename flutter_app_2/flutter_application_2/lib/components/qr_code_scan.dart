@@ -388,7 +388,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Text(

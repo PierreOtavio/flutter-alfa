@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +17,7 @@ class RelatorioPage extends StatefulWidget {
 }
 
 class _RelatorioPageState extends State<RelatorioPage> {
-  static const String _tokenKey = 'auth_token';
+  // static const String _tokenKey = 'auth_token';
   late Future<List<dynamic>> _relatorioFuture;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
@@ -26,24 +27,10 @@ class _RelatorioPageState extends State<RelatorioPage> {
     _relatorioFuture = fetchRelatorio();
   }
 
-  Future<String?> _getToken() async {
-    try {
-      String? token;
-      if (kIsWeb) {
-        final prefs = await SharedPreferences.getInstance();
-        token = prefs.getString(_tokenKey);
-      } else {
-        token = await _secureStorage.read(key: _tokenKey);
-      }
-      return token;
-    } catch (e) {
-      debugPrint("Erro ao obter token: $e");
-      return null;
-    }
-  }
+  
 
   Future<List<dynamic>> fetchRelatorio() async {
-    final token = await _getToken();
+    final token = await ApiService().getToken();
     if (token == null || token.isEmpty) {
       throw Exception('Usuário não autenticado ou token inválido.');
     }

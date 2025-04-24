@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart'; // PlatformException não está sendo capturada aqui
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/components/qr_code_scan.dart';
+import 'package:flutter_application_2/services/api_service.dart';
 import 'package:flutter_application_2/solicitar_finalizar_page.dart'; // Importa Finalizar
 import 'package:flutter_application_2/data/veiculo.dart'; // Importa Modelo Veiculo
 import 'package:flutter_application_2/goals/config.dart';
@@ -27,7 +28,7 @@ class InicioSolicPage extends StatefulWidget {
 class _InicioSolicPageState extends State<InicioSolicPage> {
   bool isLoading = true; // Começa carregando
   final _secureStorage = const FlutterSecureStorage();
-  final String _tokenKey = 'auth_token';
+  // final String _tokenKey = 'auth_token';
 
   Map<String, dynamic>? solicitacaoDetalhes;
   DateTime? dataPrevPegar, dataPrevDevolver;
@@ -83,37 +84,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
     await getSolicByID(widget.solicitacaoID);
   }
 
-  Future<String?> _getToken() async {
-    if (kIsWeb) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString(_tokenKey);
-        // if (kDebugMode) {
-        //   print(
-        //     "Token lido do SharedPreferences (Web): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
-        //   );
-        // }
-        return token;
-      } catch (e) {
-        if (kDebugMode) print("Erro ao ler SharedPreferences na Web: $e");
-        return null;
-      }
-    } else {
-      try {
-        final token = await _secureStorage.read(key: _tokenKey);
-        // if (kDebugMode) {
-        //   print(
-        //     "Token lido do Secure Storage (Mobile): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
-        //   );
-        // }
-        return token;
-      } catch (e) {
-        if (kDebugMode) print("Erro ao ler token do Secure Storage: $e");
-        return null;
-      }
-    }
-  }
-
   Future<void> getSolicByID(int id) async {
     if (!mounted) return;
     if (kDebugMode) {
@@ -128,7 +98,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
       // Mantém isLoading = true até o fim ou erro
     });
 
-    final token = await _getToken();
+    final token = await ApiService().getToken();
     if (token == null) {
       if (!mounted) return;
       setState(() {

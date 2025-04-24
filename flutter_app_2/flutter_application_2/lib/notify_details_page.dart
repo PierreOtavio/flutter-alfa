@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/services/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/goals/config.dart';
@@ -23,7 +24,7 @@ class _NotifyDetailsPageState extends State<NotifyDetailsPage> {
   String? responseMessage;
   String? errorMessage; // Para erros no fetch inicial
   final _secureStorage = const FlutterSecureStorage();
-  final String _tokenKey = 'auth_token';
+  // final String _tokenKey = 'auth_token';
 
   bool _solicitacaoJaRespondida = false;
   String _statusAtual = '';
@@ -67,7 +68,7 @@ class _NotifyDetailsPageState extends State<NotifyDetailsPage> {
       return;
     }
 
-    final token = await _getToken();
+    final token = await ApiService().getToken();
     if (token == null) {
       if (kDebugMode) print("Erro: Token não encontrado para buscar status.");
       setState(() {
@@ -500,22 +501,22 @@ class _NotifyDetailsPageState extends State<NotifyDetailsPage> {
     );
   }
 
-  Future<String?> _getToken() async {
-    // ... (código _getToken sem alterações) ...
-    try {
-      String? token;
-      if (kIsWeb) {
-        final prefs = await SharedPreferences.getInstance();
-        token = prefs.getString(_tokenKey);
-      } else {
-        token = await _secureStorage.read(key: _tokenKey);
-      }
-      return token;
-    } catch (e) {
-      debugPrint("Erro ao obter token: $e");
-      return null;
-    }
-  }
+  // Future<String?> _getToken() async {
+  //   // ... (código _getToken sem alterações) ...
+  //   try {
+  //     String? token;
+  //     if (kIsWeb) {
+  //       final prefs = await SharedPreferences.getInstance();
+  //       token = prefs.getString(_tokenKey);
+  //     } else {
+  //       token = await _secureStorage.read(key: _tokenKey);
+  //     }
+  //     return token;
+  //   } catch (e) {
+  //     debugPrint("Erro ao obter token: $e");
+  //     return null;
+  //   }
+  // }
 
   Future<String?> _showRecusaDialog() async {
     // ... (código _showRecusaDialog sem alterações) ...
@@ -599,7 +600,7 @@ class _NotifyDetailsPageState extends State<NotifyDetailsPage> {
     }); // Inicia loading da AÇÃO
 
     try {
-      final token = await _getToken();
+      final token = await ApiService().getToken();
       if (token == null || token.isEmpty) {
         throw Exception('Token inválido');
       }

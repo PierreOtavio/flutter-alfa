@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/goals/globals.dart';
 import 'package:flutter_application_2/solicitados_user.dart';
 import 'package:flutter_application_2/relatorio_page.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});

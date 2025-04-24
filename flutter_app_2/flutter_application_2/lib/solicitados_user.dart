@@ -8,6 +8,7 @@ import 'package:flutter_application_2/data/user.dart';
 import 'package:flutter_application_2/goals/config.dart';
 import 'package:flutter_application_2/goals/globals.dart';
 import 'package:flutter_application_2/inicio_solic_page.dart';
+import 'package:flutter_application_2/services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,8 +23,8 @@ class SolicitadosUser extends StatefulWidget {
 class _SolicitadosUserState extends State<SolicitadosUser> {
   bool isLoading = false;
   final _secureStorage = const FlutterSecureStorage();
-  final String _tokenKey =
-      'auth_token'; // Altere para sua chave real, se necessário
+  // final String _tokenKey =
+  //     'auth_token'; // Altere para sua chave real, se necessário
   List<dynamic> solicitacoes = [];
 
   @override
@@ -33,42 +34,42 @@ class _SolicitadosUserState extends State<SolicitadosUser> {
   }
 
   // Recupera o token de autenticação (compatível com web e mobile)
-  Future<String?> _getToken() async {
-    if (kIsWeb) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString(_tokenKey);
-        print(
-          "Token lido do SharedPreferences (Web): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
-        );
-        return token;
-      } catch (e) {
-        print("Erro ao ler SharedPreferences na Web: $e");
-        return null;
-      }
-    } else {
-      try {
-        final token = await _secureStorage.read(key: _tokenKey);
-        print(
-          "Token lido do Secure Storage (Mobile): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
-        );
-        return token;
-      } on PlatformException catch (e) {
-        print("Erro ao ler token do Secure Storage: $e");
-        return null;
-      } catch (e) {
-        print("Erro inesperado ao ler Secure Storage: $e");
-        return null;
-      }
-    }
-  }
+  // Future<String?> _getToken() async {
+  //   if (kIsWeb) {
+  //     try {
+  //       final prefs = await SharedPreferences.getInstance();
+  //       final token = prefs.getString(_tokenKey);
+  //       print(
+  //         "Token lido do SharedPreferences (Web): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
+  //       );
+  //       return token;
+  //     } catch (e) {
+  //       print("Erro ao ler SharedPreferences na Web: $e");
+  //       return null;
+  //     }
+  //   } else {
+  //     try {
+  //       final token = await _secureStorage.read(key: _tokenKey);
+  //       print(
+  //         "Token lido do Secure Storage (Mobile): ${token != null && token.isNotEmpty ? 'Encontrado' : 'Não encontrado'}",
+  //       );
+  //       return token;
+  //     } on PlatformException catch (e) {
+  //       print("Erro ao ler token do Secure Storage: $e");
+  //       return null;
+  //     } catch (e) {
+  //       print("Erro inesperado ao ler Secure Storage: $e");
+  //       return null;
+  //     }
+  //   }
+  // }
 
   // Busca as solicitações da API
   Future<void> getSolic() async {
     setState(() => isLoading = true);
 
     final String apiUrl = '${AppConfig.baseUrl}/api/solicitacoes';
-    final token = await _getToken();
+    final token = await ApiService().getToken();
 
     if (token == null) {
       print('Token não encontrado!');

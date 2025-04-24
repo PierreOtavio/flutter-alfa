@@ -12,6 +12,7 @@ import 'package:flutter_application_2/goals/globals.dart';
 // Ensure these imports point to the correct files in your project
 // import 'package:flutter_application_2/data/solicitar.dart';
 import 'package:flutter_application_2/inicio_page.dart';
+import 'package:flutter_application_2/services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -44,7 +45,6 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
 
   bool _isLoading = false;
   final _secureStorage = const FlutterSecureStorage();
-  final String _tokenKey = 'auth_token';
 
   @override
   void dispose() {
@@ -88,45 +88,11 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
     }
   }
 
-  Future<String?> _getToken() async {
-    // ... (getToken implementation remains the same)
-    if (kIsWeb) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString(_tokenKey);
-        print("Token (Web): ${token != null ? 'Found' : 'Not Found'}");
-        return token;
-      } catch (e) {
-        print("Erro SharedPreferences (Web): $e");
-        return null;
-      }
-    } else {
-      try {
-        final token = await _secureStorage.read(key: _tokenKey);
-        print("Token (Mobile): ${token != null ? 'Found' : 'Not Found'}");
-        return token;
-      } on PlatformException catch (e) {
-        print("Erro Platform Secure Storage: $e");
-        if (!mounted) return null; // Check mounted before context
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro de armazenamento: ${e.message}')),
-        );
-        return null;
-      } catch (e) {
-        print("Erro Secure Storage: $e");
-        if (!mounted) return null; // Check mounted before context
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro inesperado de armazenamento: $e')),
-        );
-        return null;
-      }
-    }
-  }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate() || !mounted) return;
 
-    String? authToken = await _getToken();
+    String? authToken = await ApiService().getToken();
 
     if (authToken == null || authToken.isEmpty) {
       if (!mounted) return;
