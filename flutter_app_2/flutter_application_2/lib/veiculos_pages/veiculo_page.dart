@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 // import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart'; // Import for kIsWeb
+// import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/services/api_service.dart';
-import 'package:flutter_application_2/veicsoli_page.dart';
+import 'package:flutter_application_2/veiculos_pages/veicsoli_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_2/data/veiculo.dart';
 import 'package:flutter_application_2/components/qr_code_scan.dart'; // Verifique o caminho
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class VeiculoPage extends StatefulWidget {
   const VeiculoPage({super.key});
@@ -25,14 +25,11 @@ class _VeiculoPageState extends State<VeiculoPage> {
   final TextEditingController searchController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
-  
-  
 
   List<Veiculo> veiculos = [];
   List<Veiculo> filtroAply = [];
 
-  final _secureStorage = const FlutterSecureStorage();
-  
+  // final _secureStorage = const FlutterSecureStorage();
 
   final String apiUrl = '${AppConfig.baseUrl}/api/veiculos/disponiveis';
 
@@ -77,49 +74,48 @@ class _VeiculoPageState extends State<VeiculoPage> {
     });
   }
 
-//   Future<String?> _getToken() async {
-//   if (kIsWeb) {
-//     try {
-//       final prefs = await SharedPreferences.getInstance();
-//       String? token = prefs.getString('auth_token');
+  //   Future<String?> _getToken() async {
+  //   if (kIsWeb) {
+  //     try {
+  //       final prefs = await SharedPreferences.getInstance();
+  //       String? token = prefs.getString('auth_token');
 
-//       if (prefs.containsKey('auth_token')) {
-//         print("Chave: 'auth_token'");
-//         print("Valor: ${token ?? 'Nulo'}");
-//       } else {
-//         print("Token não encontrado no SharedPreferences.");
-//       }
+  //       if (prefs.containsKey('auth_token')) {
+  //         print("Chave: 'auth_token'");
+  //         print("Valor: ${token ?? 'Nulo'}");
+  //       } else {
+  //         print("Token não encontrado no SharedPreferences.");
+  //       }
 
-//       return token;
-//     } catch (e) {
-//       print("Erro ao ler SharedPreferences na Web: $e");
-//       _handleError("Erro ao acessar preferências na web: $e");
-//       return null;
-//     }
-//   } else {
-//     try {
-//       String? token = await _secureStorage.read(key: 'auth_token');
+  //       return token;
+  //     } catch (e) {
+  //       print("Erro ao ler SharedPreferences na Web: $e");
+  //       _handleError("Erro ao acessar preferências na web: $e");
+  //       return null;
+  //     }
+  //   } else {
+  //     try {
+  //       String? token = await _secureStorage.read(key: 'auth_token');
 
-//       if (token != null) {
-//         print("Chave: 'auth_token'");
-//         print("Valor: $token");
-//       } else {
-//         print("Token não encontrado no Secure Storage.");
-//       }
+  //       if (token != null) {
+  //         print("Chave: 'auth_token'");
+  //         print("Valor: $token");
+  //       } else {
+  //         print("Token não encontrado no Secure Storage.");
+  //       }
 
-//       return token;
-//     } on PlatformException catch (e) {
-//       print("Erro ao ler token do Secure Storage: $e");
-//       _handleError(e);
-//       return null;
-//     } catch (e) {
-//       print("Erro inesperado ao ler Secure Storage: $e");
-//       _handleError("Erro inesperado ao ler armazenamento: $e");
-//       return null;
-//     }
-//   }
-// }
-
+  //       return token;
+  //     } on PlatformException catch (e) {
+  //       print("Erro ao ler token do Secure Storage: $e");
+  //       _handleError(e);
+  //       return null;
+  //     } catch (e) {
+  //       print("Erro inesperado ao ler Secure Storage: $e");
+  //       _handleError("Erro inesperado ao ler armazenamento: $e");
+  //       return null;
+  //     }
+  //   }
+  // }
 
   Future<void> getVeiculos() async {
     if (!mounted) return;
@@ -128,7 +124,7 @@ class _VeiculoPageState extends State<VeiculoPage> {
       errorMessage = null;
     });
 
-    String? authToken;
+    dynamic authToken;
     try {
       authToken = await (ApiService().getToken());
 

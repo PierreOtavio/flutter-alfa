@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/components/qr_code_scan.dart';
 import 'package:flutter_application_2/services/api_service.dart';
-import 'package:flutter_application_2/solicitar_finalizar_page.dart'; // Importa Finalizar
+import 'package:flutter_application_2/solicitar_pages/solicitar_finalizar_page.dart'; // Importa Finalizar
 import 'package:flutter_application_2/data/veiculo.dart'; // Importa Modelo Veiculo
-import 'package:flutter_application_2/goals/config.dart';
-import 'package:flutter_application_2/notify_details_page.dart'; // Importa detalhes da notificação
+import 'package:flutter_application_2/services/config.dart';
+import 'package:flutter_application_2/notify_pages/notify_details_page.dart'; // Importa detalhes da notificação
 import 'package:flutter_application_2/goals/globals.dart'; // Importa globals para 'instance'
 // import 'package:flutter_application_2/data/user.dart'; // Importa User para checar 'instance'
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';a
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class InicioSolicPage extends StatefulWidget {
   final int solicitacaoID;
@@ -27,7 +27,7 @@ class InicioSolicPage extends StatefulWidget {
 
 class _InicioSolicPageState extends State<InicioSolicPage> {
   bool isLoading = true; // Começa carregando
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
   // final String _tokenKey = 'auth_token';
 
   Map<String, dynamic>? solicitacaoDetalhes;
@@ -99,6 +99,9 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
     });
 
     final token = await ApiService().getToken();
+    // print("Token no SharedPreferences: ${token['sharedPreferences']}");
+    // print("Token no SecureStorage: ${token['secureStorage']}");
+    // print("Status de validação: ${token['status']}");
     if (token == null) {
       if (!mounted) return;
       setState(() {

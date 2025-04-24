@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/notificacao.dart';
-import 'package:flutter_application_2/goals/config.dart';
-import 'package:flutter_application_2/notify_details_page.dart';
+import 'package:flutter_application_2/services/config.dart';
+import 'package:flutter_application_2/notify_pages/notify_details_page.dart';
 import 'package:flutter_application_2/relatorio_page.dart';
 import 'package:flutter_application_2/services/api_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class NotifyPage extends StatefulWidget {
@@ -23,14 +23,13 @@ class _NotifyPageState extends State<NotifyPage> {
   bool isLoading = true;
   String? errorMessage;
   List<Notificacao> notifications = [];
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
     getNotifications();
   }
-
 
   Future<void> getNotifications() async {
     setState(() {
@@ -40,6 +39,9 @@ class _NotifyPageState extends State<NotifyPage> {
 
     try {
       final token = await ApiService().getToken();
+      // print("Token no SharedPreferences: ${token['sharedPreferences']}");
+      // print("Token no SecureStorage: ${token['secureStorage']}");
+      // print("Status de validação: ${token['status']}");
 
       if (token == null || token.isEmpty) {
         throw Exception('Token inválido');

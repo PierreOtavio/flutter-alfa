@@ -2,14 +2,15 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/api_service.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
 // import 'package:flutter_application_2/data/marca.dart';
 // import 'package:flutter_application_2/data/modelo.dart';
 import 'package:flutter_application_2/inicio_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class SolicitarFinalizarPage extends StatefulWidget {
   final int solicitacaoId; // ID da solicitação a ser finalizada
@@ -32,12 +33,12 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
   final _placaController = TextEditingController();
   final _kmFinalController = TextEditingController(); // Para o KM final
   final _obsController = TextEditingController(); // Para observações
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
 
   bool _isLoading = false;
   String? _errorMessage;
 
-  static const String _tokenKey = 'auth_token';
+  // static const String _tokenKey = 'auth_token';
 
   static const Color pageBackgroundColor = Color(0xFF303030);
   static const Color appBarColor = Color(0xFF013A65);
@@ -62,20 +63,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
     super.dispose();
   }
 
-  Future<String?> _getAuthToken() async {
-    try {
-      if (kIsWeb) {
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_tokenKey);
-      } else {
-        return await _secureStorage.read(key: _tokenKey);
-      }
-    } catch (e) {
-      print("Erro ao ler token: $e");
-      return null;
-    }
-  }
-
   // Função para normalizar placa (remover traço e maiúsculas)
   String _normalizePlaca(String placa) {
     return placa.replaceAll('-', '').toUpperCase();
@@ -90,8 +77,8 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
         _errorMessage = null;
       });
 
-      final authToken = await _getAuthToken();
-      if (authToken == null) {
+      final token = await ApiService().getToken();
+      if (token == null) {
         setState(() {
           _isLoading = false;
           _errorMessage = 'Erro de autenticação.';
@@ -101,7 +88,7 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
       }
 
       try {
-        final response = await _callFinalizarApi(authToken);
+        final response = await _callFinalizarApi(token);
         if (!mounted) return;
         final data = jsonDecode(response.body);
 

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
-import 'package:flutter_application_2/info_add_solic_page.dart';
+import 'package:flutter_application_2/solicitar_pages/info_add_solic_page.dart';
 // import 'package:http/http.dart' as http;
 
 class VeicSoliPage extends StatelessWidget {

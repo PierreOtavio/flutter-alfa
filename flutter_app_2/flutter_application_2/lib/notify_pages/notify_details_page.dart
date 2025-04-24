@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/services/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_2/components/app_bar.dart';
-import 'package:flutter_application_2/goals/config.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_2/services/config.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
@@ -23,7 +23,7 @@ class _NotifyDetailsPageState extends State<NotifyDetailsPage> {
   bool isLoading = true;
   String? responseMessage;
   String? errorMessage; // Para erros no fetch inicial
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
   // final String _tokenKey = 'auth_token';
 
   bool _solicitacaoJaRespondida = false;
@@ -68,7 +68,7 @@ class _NotifyDetailsPageState extends State<NotifyDetailsPage> {
       return;
     }
 
-    final token = await ApiService().getToken();
+    final token = await ApiService().getAndValidateTokens();
     if (token == null) {
       if (kDebugMode) print("Erro: Token não encontrado para buscar status.");
       setState(() {

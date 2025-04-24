@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/data/cargo.dart';
 import 'package:flutter_application_2/data/user.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/goals/globals.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,8 +81,28 @@ class _LoginPageState extends State<LoginPage> {
         if (data.containsKey('token')) {
           final token = data['token'];
           print('Token recebido: $token');
+
+          // ============ NOVO CÓDIGO ADICIONADO ============
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', token);
+          final secureStorage = FlutterSecureStorage();
+
+          try {
+            // Salvar no SharedPreferences
+            await prefs.setString('auth_token', token);
+            print("[DEBUG] Token salvo no SharedPreferences: $token");
+
+            // Salvar no SecureStorage
+            await secureStorage.write(key: 'auth_token', value: token);
+            print("[DEBUG] Token salvo no SecureStorage: $token");
+          } catch (e) {
+            print("[ERRO CRÍTICO] Falha ao salvar token: $e");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Falha no armazenamento local: $e')),
+            );
+            return;
+          }
+          // ============ FIM DAS MODIFICAÇÕES ============
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => InicioPage()),

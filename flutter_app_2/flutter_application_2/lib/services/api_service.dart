@@ -1,54 +1,65 @@
-import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ApiService 
-{
-  final _secureStorage = FlutterSecureStorage();
+class ApiService {
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  Future<String?> getToken() async {
-  if (kIsWeb) {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('auth_token');
+  Future<String> getToken() async {
+    final tokenData = await getAndValidateTokens();
 
-      if (prefs.containsKey('auth_token')) {
-        print("Chave: 'auth_token'");
-        print("Valor: ${token ?? 'Nulo'}");
-      } else {
-        print("Token não encontrado no SharedPreferences.");
-      }
-
-      return token;
-    } catch (e) {
-      print("Erro ao ler SharedPreferences na Web: $e");
-      // _handleError("Erro ao acessar preferências na web: $e");
-      return null;
-    }
-  } else {
-    try {
-      String? token = await _secureStorage.read(key: 'auth_token');
-
-      if (token != null) {
-        print("Chave: 'auth_token'");
-        print("Valor: $token");
-      } else {
-        print("Token não encontrado no Secure Storage.");
-      }
-
-      return token;
-    } on PlatformException catch (e) {
-      print("Erro ao ler token do Secure Storage: $e");
-      // _handleError(e);
-      return null;
-    } catch (e) {
-      print("Erro inesperado ao ler Secure Storage: $e");
-      // _handleError("Erro inesperado ao ler armazenamento: $e");
-      return null;
+    if (tokenData['secureStorage'] != null) {
+      return tokenData['secureStorage'];
+    } else if (tokenData['sharedPreferences'] != null) {
+      return tokenData['sharedPreferences'];
+    } else {
+      throw Exception('Usuário não autenticado ou token inválido.');
     }
   }
-}
 
+  /// Busca e valida os tokens nas duas instâncias de armazenamento.
+  Future<Map<String, dynamic>> getAndValidateTokens() async {
+    String? tokenShared;
+    String? tokenSecure;
+
+    // Buscar no SharedPreferences (funciona em todas as plataformas suportadas)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      tokenShared = prefs.getString('auth_token');
+      print('[DEBUG] Token no SharedPreferences: ${tokenShared ?? "NULO"}');
+    } catch (e) {
+      print('[ERRO] Falha ao ler do SharedPreferences: $e');
+    }
+
+    // Buscar no SecureStorage (funciona em mobile, desktop e web com suporte)
+    try {
+      tokenSecure = await _secureStorage.read(key: 'auth_token');
+      print('[DEBUG] Token no SecureStorage: ${tokenSecure ?? "NULO"}');
+    } catch (e) {
+      print('[ERRO] Falha ao ler do SecureStorage: $e');
+    }
+
+    // Validação simples
+    String status;
+    if (tokenShared == null && tokenSecure == null) {
+      status = "Nenhum token encontrado em nenhum armazenamento.";
+    } else if (tokenShared != null && tokenSecure != null) {
+      if (tokenShared == tokenSecure) {
+        status = "Tokens encontrados e são IGUAIS.";
+      } else {
+        status = "Tokens encontrados, mas são DIFERENTES.";
+      }
+    } else if (tokenShared != null) {
+      status = "Token encontrado apenas no SharedPreferences.";
+    } else {
+      status = "Token encontrado apenas no SecureStorage.";
+    }
+
+    print('[VALIDAÇÃO] $status');
+
+    return {
+      'sharedPreferences': tokenShared,
+      'secureStorage': tokenSecure,
+      'status': status,
+    };
+  }
 }

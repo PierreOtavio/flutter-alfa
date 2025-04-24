@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io'; // Para SocketException
-import 'package:flutter/foundation.dart'; // Para kIsWeb
+// import 'package:flutter/foundation.dart'; // Para kIsWeb
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/services/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
-import 'package:flutter_application_2/solicitar_iniciar_page.dart'; // <<< IMPORTANTE
-import 'package:flutter_application_2/goals/config.dart'; // Sua configuração de URL base
+import 'package:flutter_application_2/solicitar_pages/solicitar_iniciar_page.dart'; // <<< IMPORTANTE
+import 'package:flutter_application_2/services/config.dart'; // Sua configuração de URL base
 
 class QRCodeScannerPage extends StatefulWidget {
   const QRCodeScannerPage({super.key});
@@ -19,14 +20,13 @@ class QRCodeScannerPage extends StatefulWidget {
 
 class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   final MobileScannerController _scannerController = MobileScannerController();
-  final _secureStorage = const FlutterSecureStorage();
 
   bool _isProcessing = false; // Controla o overlay de processamento
   String?
   _scannedUrl; // Guarda a última URL escaneada para evitar processamento repetido
 
   // Chave para armazenamento seguro do token
-  static const String _tokenKey = 'auth_token';
+  // static const String _tokenKey = 'auth_token';
 
   // --- Cores para Diálogo de Erro (ainda necessário) ---
   static const Color _dialogBackgroundColor = Color(0xFF303030);
@@ -43,21 +43,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   }
 
   // --- Função para obter o Token (mantida) ---
-  Future<String?> _getAuthToken() async {
-    try {
-      if (kIsWeb) {
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_tokenKey);
-      } else {
-        return await _secureStorage.read(key: _tokenKey);
-      }
-    } catch (e) {
-      print("Erro ao ler token: $e");
-      // Mostrar erro crítico se não conseguir ler o token?
-      // _showErrorDialog("Falha ao acessar o armazenamento seguro. Tente reiniciar o app.");
-      return null;
-    }
-  }
 
   // --- Função chamada quando um QR Code é detectado ---
   Future<void> _handleQrCodeDetected(BarcodeCapture capture) async {
@@ -89,7 +74,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
 
   // --- Função que chama a API do Backend com a URL escaneada ---
   Future<void> _processQrCodeUrl(String url) async {
-    final authToken = await _getAuthToken();
+    final authToken = await ApiService().getToken();
     if (authToken == null) {
       // Se não houver token, mostra erro e para o processamento
       _showErrorDialog(

@@ -2,21 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io'; // Keep for potential Platform checks if needed later
 
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/solicitar.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/goals/globals.dart';
 // Ensure these imports point to the correct files in your project
 // import 'package:flutter_application_2/data/solicitar.dart';
 import 'package:flutter_application_2/inicio_page.dart';
 import 'package:flutter_application_2/services/api_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class InfoAddSolicPage extends StatefulWidget {
   final int veiculoId;
@@ -44,7 +44,7 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
   // --- End API URL Config ---
 
   bool _isLoading = false;
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
 
   @override
   void dispose() {
@@ -88,11 +88,13 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
     }
   }
 
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate() || !mounted) return;
 
-    String? authToken = await ApiService().getToken();
+    final authToken = await ApiService().getToken();
+    // print("Token no SharedPreferences: ${authToken['sharedPreferences']}");
+    // print("Token no SecureStorage: ${authToken['secureStorage']}");
+    // print("Status de validação: ${authToken['status']}");
 
     if (authToken == null || authToken.isEmpty) {
       if (!mounted) return;

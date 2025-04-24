@@ -2,7 +2,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/api_service.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/data/veiculo.dart'; // Verifique se seu modelo Veiculo está correto
 // import 'package:flutter_application_2/data/marca.dart'; // Importe se Marca for um objeto separado
 // import 'package:flutter_application_2/data/modelo.dart'; // Importe se Modelo for um objeto separado
@@ -31,12 +32,12 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
   final _formKey = GlobalKey<FormState>();
   final _kmController = TextEditingController();
   final _motivoController = TextEditingController();
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
 
   bool _isLoading = false;
   String? _errorMessage;
 
-  static const String _tokenKey = 'auth_token';
+  // static const String _tokenKey = 'auth_token';
 
   // Cores
   static const Color pageBackgroundColor = Color(0xFF303030);
@@ -53,20 +54,6 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
     super.dispose();
   }
 
-  Future<String?> _getAuthToken() async {
-    try {
-      if (kIsWeb) {
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_tokenKey);
-      } else {
-        return await _secureStorage.read(key: _tokenKey);
-      }
-    } catch (e) {
-      print("Erro ao ler token: $e");
-      return null;
-    }
-  }
-
   Future<void> _submit() async {
     if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
@@ -75,7 +62,7 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
         _errorMessage = null;
       });
 
-      final authToken = await _getAuthToken();
+      final authToken = await ApiService().getToken();
       if (authToken == null) {
         setState(() {
           _isLoading = false;

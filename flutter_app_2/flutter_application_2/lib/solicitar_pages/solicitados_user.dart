@@ -1,17 +1,17 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 // import 'package:flutter_application_2/data/cargo.dart';
 import 'package:flutter_application_2/data/user.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/goals/globals.dart';
-import 'package:flutter_application_2/inicio_solic_page.dart';
+import 'package:flutter_application_2/solicitar_pages/inicio_solic_page.dart';
 import 'package:flutter_application_2/services/api_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class SolicitadosUser extends StatefulWidget {
   const SolicitadosUser({super.key});
@@ -22,7 +22,7 @@ class SolicitadosUser extends StatefulWidget {
 
 class _SolicitadosUserState extends State<SolicitadosUser> {
   bool isLoading = false;
-  final _secureStorage = const FlutterSecureStorage();
+  // final _secureStorage = const FlutterSecureStorage();
   // final String _tokenKey =
   //     'auth_token'; // Altere para sua chave real, se necessário
   List<dynamic> solicitacoes = [];
@@ -70,6 +70,9 @@ class _SolicitadosUserState extends State<SolicitadosUser> {
 
     final String apiUrl = '${AppConfig.baseUrl}/api/solicitacoes';
     final token = await ApiService().getToken();
+    // print("Token no SharedPreferences: ${token['sharedPreferences']}");
+    // print("Token no SecureStorage: ${token['secureStorage']}");
+    // print("Status de validação: ${token['status']}");
 
     if (token == null) {
       print('Token não encontrado!');

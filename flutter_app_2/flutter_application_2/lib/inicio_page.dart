@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/login_page.dart';
-import 'package:flutter_application_2/notify_page.dart';
-import 'package:flutter_application_2/veicsoli_page.dart';
-import 'package:flutter_application_2/veiculo_page.dart';
+import 'package:flutter_application_2/notify_pages/notify_page.dart';
+import 'package:flutter_application_2/veiculos_pages/veicsoli_page.dart';
+import 'package:flutter_application_2/veiculos_pages/veiculo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/goals/globals.dart';
-import 'package:flutter_application_2/solicitados_user.dart';
+import 'package:flutter_application_2/solicitar_pages/solicitados_user.dart';
 import 'package:flutter_application_2/relatorio_page.dart';
 // import 'package:flutter/material.dart';
 

@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
-import 'package:flutter_application_2/goals/config.dart';
+import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/services/api_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 class RelatorioPage extends StatefulWidget {
@@ -19,7 +19,7 @@ class RelatorioPage extends StatefulWidget {
 class _RelatorioPageState extends State<RelatorioPage> {
   // static const String _tokenKey = 'auth_token';
   late Future<List<dynamic>> _relatorioFuture;
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  // final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -27,13 +27,8 @@ class _RelatorioPageState extends State<RelatorioPage> {
     _relatorioFuture = fetchRelatorio();
   }
 
-  
-
   Future<List<dynamic>> fetchRelatorio() async {
     final token = await ApiService().getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('Usuário não autenticado ou token inválido.');
-    }
     final url = Uri.parse('${AppConfig.baseUrl}/api/relatorio-veiculos');
     try {
       final response = await http.get(
