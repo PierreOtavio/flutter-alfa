@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/data/notificacao.dart';
+import 'package:flutter_application_2/goals/globals.dart';
 import 'package:flutter_application_2/services/config.dart';
 import 'package:flutter_application_2/notify_pages/notify_details_page.dart';
 import 'package:flutter_application_2/relatorio_page.dart';
@@ -144,9 +145,10 @@ class _NotifyPageState extends State<NotifyPage> {
                     ),
                   ),
                   SizedBox(height: 4),
+                  // if(notif != null),
                   Text(
-                    _getSolicitante(notif.detalhes),
-                    style: const TextStyle(color: Colors.white70, fontSize: 15),
+                    'Nome de quem solicitou: ${notif.nomeSolicitante}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                   SizedBox(height: 8),
                   Text(
@@ -171,8 +173,8 @@ class _NotifyPageState extends State<NotifyPage> {
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => NotifyDetailsPage(
-                            notificationJson: notif.rawJson,
+                          (context) => NotificationDetailsPage(
+                            notification: notif.rawJson,
                           ),
                     ),
                   );
@@ -204,19 +206,5 @@ class _NotifyPageState extends State<NotifyPage> {
     } else {
       return 'Ver Mais';
     }
-  }
-
-  String _getSolicitante(detalhes) {
-    if (detalhes == null || detalhes['user'] == null) {
-      return 'Informação indisponível';
-    }
-    final cargoId = detalhes['user']['cargo_id'];
-    final nome = detalhes['user']['name'] ?? 'Desconhecido';
-    if (cargoId == 1) {
-      return 'Aprovador: $nome';
-    } else if (cargoId == 2) {
-      return 'Solicitante: $nome';
-    }
-    return 'Usuário desconhecido';
   }
 }

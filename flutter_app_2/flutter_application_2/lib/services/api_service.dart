@@ -25,17 +25,17 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       tokenShared = prefs.getString('auth_token');
-      print('[DEBUG] Token no SharedPreferences: ${tokenShared ?? "NULO"}');
+      // print('[DEBUG] Token no SharedPreferences: ${tokenShared ?? "NULO"}');
     } catch (e) {
-      print('[ERRO] Falha ao ler do SharedPreferences: $e');
+      // print('[ERRO] Falha ao ler do SharedPreferences: $e');
     }
 
     // Buscar no SecureStorage (funciona em mobile, desktop e web com suporte)
     try {
       tokenSecure = await _secureStorage.read(key: 'auth_token');
-      print('[DEBUG] Token no SecureStorage: ${tokenSecure ?? "NULO"}');
+      // print('[DEBUG] Token no SecureStorage: ${tokenSecure ?? "NULO"}');
     } catch (e) {
-      print('[ERRO] Falha ao ler do SecureStorage: $e');
+      // print('[ERRO] Falha ao ler do SecureStorage: $e');
     }
 
     // Validação simples
@@ -54,7 +54,7 @@ class ApiService {
       status = "Token encontrado apenas no SecureStorage.";
     }
 
-    print('[VALIDAÇÃO] $status');
+    // print('[VALIDAÇÃO] $status');
 
     return {
       'sharedPreferences': tokenShared,

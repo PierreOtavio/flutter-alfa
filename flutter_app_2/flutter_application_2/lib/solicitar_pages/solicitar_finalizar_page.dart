@@ -262,7 +262,7 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
               // --- Campo KM Final ---
               TextFormField(
                 controller: _kmFinalController,
-                style: const TextStyle(color: textColor),
+                style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration(
                   'KM Final no Velocímetro',
                   'Ex: 150450',

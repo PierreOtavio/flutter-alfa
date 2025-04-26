@@ -201,13 +201,6 @@ class _SolicitadosUserState extends State<SolicitadosUser> {
                                 fontSize: 16,
                               ),
                             ),
-                            // Text(
-                            //   'Solicitado por: ${veiculo['obs_veiculo']}',
-                            //   style: const TextStyle(
-                            //     color: Colors.white,
-                            //     fontSize: 16,
-                            //   ),
-                            // ),
                           ],
                         ),
                       ),

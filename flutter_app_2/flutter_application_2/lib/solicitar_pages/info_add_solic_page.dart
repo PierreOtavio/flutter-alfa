@@ -177,7 +177,8 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
         'prev_hora_inicio': prevHoraInicioController.text,
         'prev_data_final': formattedPrevDataFinal,
         'prev_hora_final': prevHoraFinalController.text,
-        'motivo': motivoController.text,
+        'motivo':
+            motivoController.text.isNotEmpty ? motivoController.text : null,
       };
       print("Request Body: ${jsonEncode(requestBody)}"); // Log request body
 
@@ -370,7 +371,10 @@ class _InfoAddSolicPageState extends State<InfoAddSolicPage> {
                       ),
                     ),
                     onPressed: _isLoading ? null : _submitForm,
-                    child: const Text('Enviar Solicitação'),
+                    child: const Text(
+                      'Enviar Solicitação',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
             ],
           ),

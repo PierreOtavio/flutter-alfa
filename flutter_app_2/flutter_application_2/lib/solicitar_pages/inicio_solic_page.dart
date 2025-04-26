@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart'; // PlatformException não está sendo capturada aqui
 import 'package:flutter_application_2/components/app_bar.dart';
 import 'package:flutter_application_2/components/qr_code_scan.dart';
+import 'package:flutter_application_2/notify_pages/notify_details_page.dart';
 import 'package:flutter_application_2/services/api_service.dart';
 import 'package:flutter_application_2/solicitar_pages/solicitar_finalizar_page.dart'; // Importa Finalizar
 import 'package:flutter_application_2/data/veiculo.dart'; // Importa Modelo Veiculo
 import 'package:flutter_application_2/services/config.dart';
-import 'package:flutter_application_2/notify_pages/notify_details_page.dart'; // Importa detalhes da notificação
+// import 'package:flutter_application_2/notify_pages/notify_details_page.dart'; // Importa detalhes da notificação
 import 'package:flutter_application_2/goals/globals.dart'; // Importa globals para 'instance'
 // import 'package:flutter_application_2/data/user.dart'; // Importa User para checar 'instance'
 // import 'package:flutter_secure_storage/flutter_secure_storage.dart';a
@@ -620,8 +621,8 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
               context,
               MaterialPageRoute(
                 builder:
-                    (context) => NotifyDetailsPage(
-                      notificationJson: dadosParaNotificacao,
+                    (context) => NotificationDetailsPage(
+                      notification: dadosParaNotificacao,
                     ), // Passa o mapa adaptado
               ),
             ).then((_) {
