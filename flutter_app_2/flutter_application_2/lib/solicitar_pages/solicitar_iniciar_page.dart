@@ -199,7 +199,6 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Card(
-                /* ... Card com informações do veículo ... */
                 color: Colors.grey[800],
                 elevation: 3,
                 shape: RoundedRectangleBorder(
@@ -220,28 +219,19 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
                       ),
                       const SizedBox(height: 10),
                       _buildInfoRow('Placa:', widget.veiculo.placa),
-                      // <<< CORREÇÃO: Acessar o nome dentro do objeto marca/modelo >>>
-                      // Verifique se os nomes 'marca' e 'modelo' no seu Veiculo.dart
-                      // correspondem aos objetos Marca e Modelo e se eles têm um campo 'nome'.
-                      if (widget.veiculo.marca?.marca !=
-                          null) // Assumindo que o campo é 'nome'
-                        _buildInfoRow(
-                          'Marca:',
-                          widget.veiculo.marca!.marca!,
-                        ), // Usar ! pois já checou null
-                      if (widget.veiculo.modelo?.modelo !=
-                          null) // Assumindo que o campo é 'nome'
+                      if (widget.veiculo.marca?.marca != null)
+                        _buildInfoRow('Marca:', widget.veiculo.marca!.marca!),
+                      if (widget.veiculo.modelo?.modelo != null)
                         _buildInfoRow(
                           'Modelo:',
                           widget.veiculo.modelo!.modelo!,
-                        ), // Usar ! pois já checou null
+                        ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 25),
               TextFormField(
-                /* ... Campo KM Inicial ... */
                 controller: _kmController,
                 style: const TextStyle(color: textColor),
                 decoration: _inputDecoration(
@@ -262,7 +252,6 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
               const SizedBox(height: 15),
               if (widget.isUrgent)
                 TextFormField(
-                  /* ... Campo Motivo ... */
                   controller: _motivoController,
                   style: const TextStyle(color: textColor),
                   decoration: _inputDecoration(
@@ -280,7 +269,6 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
                 ),
               const SizedBox(height: 30),
               ElevatedButton(
-                /* ... Botão de Submissão ... */
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -309,7 +297,7 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
                           ),
                         ),
               ),
-              if (_errorMessage != null) /* ... Mensagem de Erro ... */
+              if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 15.0),
                   child: Text(
@@ -325,9 +313,7 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
     );
   }
 
-  // Helper para Input Decoration (mantido)
   InputDecoration _inputDecoration(String label, String hint) {
-    /* ... código mantido ... */
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(color: hintColor),
@@ -358,9 +344,7 @@ class _SolicitarIniciarPageState extends State<SolicitarIniciarPage> {
     );
   }
 
-  // Helper para Info Row (mantido)
   Widget _buildInfoRow(String label, String value) {
-    /* ... código mantido ... */
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(

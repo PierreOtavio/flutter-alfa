@@ -31,27 +31,21 @@ class SolicitarFinalizarPage extends StatefulWidget {
 class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
   final _formKey = GlobalKey<FormState>();
   final _placaController = TextEditingController();
-  final _kmFinalController = TextEditingController(); // Para o KM final
-  final _obsController = TextEditingController(); // Para observações
-  // final _secureStorage = const FlutterSecureStorage();
-
+  final _kmFinalController = TextEditingController();
+  final _obsController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-
-  // static const String _tokenKey = 'auth_token';
-
   static const Color pageBackgroundColor = Color(0xFF303030);
   static const Color appBarColor = Color(0xFF013A65);
   static const Color buttonColor = Color(0xFF013A65);
   static const Color textColor = Colors.white;
   static const Color hintColor = Colors.white70;
   static const Color errorColor = Colors.redAccent;
-  static const Color successColor = Colors.green; // Para snackbar de sucesso
+  static const Color successColor = Colors.green;
 
   @override
   void initState() {
     super.initState();
-    // Pré-preenche a placa para facilitar a confirmação
     _placaController.text = widget.veiculo.placa;
   }
 
@@ -71,7 +65,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
   Future<void> _submit() async {
     if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
-      // Validação do formulário primeiro
       setState(() {
         _isLoading = true;
         _errorMessage = null;
@@ -99,7 +92,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
           );
           await Future.delayed(const Duration(seconds: 2));
           if (mounted) {
-            // Limpa a pilha e volta para a tela inicial
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const InicioPage()),
@@ -107,7 +99,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
             );
           }
         } else {
-          // Trata erro da API
           setState(() {
             _isLoading = false;
             String errorMsg =
@@ -122,7 +113,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
           _showSnackBar(_errorMessage!);
         }
       } catch (e) {
-        // Trata erros de conexão/timeout/etc.
         if (!mounted) return;
         print("Erro ao submeter finalização: $e");
         setState(() {
@@ -134,22 +124,18 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
     }
   }
 
-  // API Call para FINALIZAR a solicitação
   Future<http.Response> _callFinalizarApi(String authToken) {
     final url = Uri.parse(
       '${AppConfig.baseUrl}/api/solicitar/${widget.solicitacaoId}/finalizar',
     );
 
     final body = jsonEncode({
-      // Backend espera 'placa_confirmar'
       'placa_confirmar': _placaController.text.trim(),
-      // Backend espera 'km_velocimetro' para o KM final
       'km_final': int.parse(_kmFinalController.text.trim()),
-      // Backend espera 'obs_users'
       'obs_users':
           _obsController.text.trim().isEmpty
               ? null
-              : _obsController.text.trim(), // Envia null se vazio
+              : _obsController.text.trim(),
     });
 
     print("Chamando API Finalizar: $url com body $body"); // Log
@@ -173,7 +159,7 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? errorColor : successColor, // Cor de sucesso
+        backgroundColor: isError ? errorColor : successColor,
         duration: Duration(seconds: isError ? 4 : 2),
       ),
     );
@@ -198,7 +184,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // --- Informações da Viagem (Opcional, mas útil) ---
               Card(
                 color: Colors.grey[800],
                 elevation: 3,
@@ -220,7 +205,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
                       ),
                       const SizedBox(height: 10),
                       _buildInfoRow('Veículo:', widget.veiculo.placa),
-                      // Exibir Marca/Modelo se disponíveis no objeto Veiculo
                       if (widget.veiculo.marca?.marca != null)
                         _buildInfoRow('Marca:', widget.veiculo.marca!.marca!),
                       if (widget.veiculo.modelo?.modelo != null)
@@ -228,28 +212,21 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
                           'Modelo:',
                           widget.veiculo.modelo!.modelo!,
                         ),
-                      _buildInfoRow(
-                        'KM Inicial:',
-                        widget.kmInicial.toString(),
-                      ), // Mostra o KM inicial
+                      _buildInfoRow('KM Inicial:', widget.kmInicial.toString()),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 25),
-
-              // --- Campo Confirmar Placa ---
               TextFormField(
                 controller: _placaController,
                 style: const TextStyle(color: textColor),
                 decoration: _inputDecoration('Confirmar Placa', 'Ex: AAA-1234'),
-                textCapitalization:
-                    TextCapitalization.characters, // Ajuda a digitar maiúsculas
+                textCapitalization: TextCapitalization.characters,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Confirme a placa do veículo.';
                   }
-                  // Validação comparando com a placa original (normalizada)
                   if (_normalizePlaca(value.trim()) !=
                       _normalizePlaca(widget.veiculo.placa)) {
                     return 'A placa informada não confere com a do veículo.';
@@ -258,8 +235,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
                 },
               ),
               const SizedBox(height: 15),
-
-              // --- Campo KM Final ---
               TextFormField(
                 controller: _kmFinalController,
                 style: const TextStyle(color: Colors.white),
@@ -276,7 +251,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
                   if (kmFinal == null || kmFinal < 0) {
                     return 'Informe um valor numérico válido.';
                   }
-                  // Validação comparando com o KM inicial
                   if (kmFinal < widget.kmInicial) {
                     return 'KM final não pode ser menor que o KM inicial (${widget.kmInicial}).';
                   }
@@ -284,8 +258,6 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
                 },
               ),
               const SizedBox(height: 15),
-
-              // --- Campo Observações (Opcional) ---
               TextFormField(
                 controller: _obsController,
                 style: const TextStyle(color: textColor),
@@ -293,13 +265,10 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
                   'Observações (Opcional)',
                   'Ex: Pequeno ruído na suspensão dianteira',
                 ),
-                maxLines: 4, // Mais espaço para observações
-                maxLength: 500, // Limite definido no backend
-                // Sem validator obrigatório
+                maxLines: 4,
+                maxLength: 500,
               ),
               const SizedBox(height: 30),
-
-              // --- Botão Finalizar ---
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
@@ -382,8 +351,7 @@ class _SolicitarFinalizarPageState extends State<SolicitarFinalizarPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start, // Alinha melhor se valor for longo
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
