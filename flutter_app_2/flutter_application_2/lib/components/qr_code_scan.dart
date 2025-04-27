@@ -1,16 +1,12 @@
 import 'dart:convert';
-import 'dart:io'; // Para SocketException
-// import 'package:flutter/foundation.dart'; // Para kIsWeb // Removido se não estiver usando kIsWeb
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/services/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
-// Removidos imports não utilizados (SecureStorage, SharedPreferences) se não estiverem em uso em outra parte
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_2/data/veiculo.dart';
-import 'package:flutter_application_2/solicitar_pages/solicitar_iniciar_page.dart'; // <<< IMPORTANTE
-import 'package:flutter_application_2/services/config.dart'; // Sua configuração de URL base
+import 'package:flutter_application_2/solicitar_pages/solicitar_iniciar_page.dart';
+import 'package:flutter_application_2/services/config.dart';
 
 class QRCodeScannerPage extends StatefulWidget {
   const QRCodeScannerPage({super.key});
@@ -20,31 +16,18 @@ class QRCodeScannerPage extends StatefulWidget {
 }
 
 class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
-  // --- CORREÇÃO: Configurações do Controller são feitas AQUI ---
   final MobileScannerController _scannerController = MobileScannerController(
-    // Defina as opções desejadas ao criar o controller:
-    facing: CameraFacing.back, // Tenta usar a câmera traseira por padrão
-    // torchEnabled: false, // Lanterna desligada por padrão
-    // formats: [BarcodeFormat.qrCode], // Especifique formatos se necessário
-    // detectionSpeed: DetectionSpeed.normal, // Controle a velocidade
+    facing: CameraFacing.back,
   );
-  // --- Fim da Correção ---
-
   bool _isProcessing = false;
   String? _scannedUrl;
-
-  // --- Cores para Diálogo (mantidas) ---
   static const Color _dialogBackgroundColor = Color(0xFF303030);
   static const Color _dialogButtonColor = Color(0xFF013A65);
   static const Color _dialogButtonTextColor = Colors.white;
   static const Color _dialogContentTextColor = Colors.white;
   static const Color _dialogTitleErrorColor = Colors.redAccent;
-  static const Color _dialogTitleInfoColor = Colors.lightBlueAccent;
-  // --- Fim das Cores ---
-
   @override
   void dispose() {
-    // Garante que o controller seja liberado corretamente
     _scannerController.dispose();
     super.dispose();
   }
@@ -78,8 +61,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       errorMessage = 'Autenticação necessária. Faça login novamente.';
       print("QR Scan: Erro - Token não encontrado.");
       _showErrorDialog(errorMessage);
-      // O reset do estado é tratado no finally
-      return; // Sai mais cedo
+      return;
     }
     print("QR Scan: Token obtido. Validando URL...");
 
@@ -87,17 +69,16 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       errorMessage = 'QR Code inválido ou não pertence ao sistema.';
       print("QR Scan: Erro - URL fora do domínio esperado: $url");
       _showErrorDialog(errorMessage);
-      // O reset do estado é tratado no finally
-      return; // Sai mais cedo
+      return;
     }
     print("QR Scan: URL validada. Enviando requisição para: $url");
-
     try {
       final response = await http
           .get(
             Uri.parse(url),
             headers: {
               'Authorization': 'Bearer $authToken',
+              'Content-type': 'application/json',
               'Accept': 'application/json',
             },
           )
@@ -119,8 +100,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
           "Resposta inválida do servidor (não JSON). Status: ${response.statusCode}",
         );
       }
-
-      // --- Lógica Principal ---
       if (response.statusCode != 200) {
         errorMessage =
             data?['message'] as String? ??
@@ -145,12 +124,11 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
         print(
           "QR Scan: Ação: $action, Veiculo: ${veiculoData?.id}, Solicitação: $solicitacaoId",
         );
-
         switch (action) {
           case 'allow_start':
             if (veiculoData != null && solicitacaoId != null) {
               print("QR Scan: Ação 'allow_start' válida. Navegando...");
-              shouldResetStateOnError = false; // Navegação ocorrerá
+              shouldResetStateOnError = false;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -173,7 +151,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
               print(
                 "QR Scan: Ação 'prompt_urgent_request' válida. Navegando...",
               );
-              shouldResetStateOnError = false; // Navegação ocorrerá
+              shouldResetStateOnError = false;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -205,12 +183,9 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
             print("QR Scan: Erro - Ação desconhecida: $action");
         }
       }
-
-      // --- Tratamento Final (Erro ou Nada Aconteceu) ---
       if (errorMessage != null) {
         _showErrorDialog(errorMessage);
       }
-      // Não precisa de 'else if' aqui, o 'finally' cuidará do reset se necessário
     } on SocketException catch (e) {
       if (!mounted) return;
       print("QR Scan: Erro de Rede (SocketException): $e");
@@ -232,21 +207,16 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       errorMessage = 'Ocorreu um erro inesperado: ${e.toString()}';
       _showErrorDialog(errorMessage);
     } finally {
-      // --- Reset do Estado ---
-      // Sempre reseta o estado se um erro ocorreu E a navegação não aconteceu.
       if (mounted && errorMessage != null && shouldResetStateOnError) {
         print("QR Scan: Resetando estado após erro: $errorMessage");
         setState(() {
           _isProcessing = false;
-          _scannedUrl = null; // Permite escanear novamente
+          _scannedUrl = null;
         });
       }
-      // Se não houve erro e a navegação não ocorreu (caso raro), poderia resetar aqui também,
-      // mas a lógica atual cobre os cenários principais.
     }
   }
 
-  // --- Função para Mostrar Diálogo de Erro (mantida) ---
   void _showErrorDialog(String message) {
     if (!mounted) return;
 
@@ -275,7 +245,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // O reset do estado é feito no 'finally' de _processQrCodeUrl
                 },
               ),
             ],
@@ -283,7 +252,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
     );
   }
 
-  // --- Construção da Interface Gráfica ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -297,22 +265,24 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: _isProcessing ? null : () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.screen_rotation_alt_sharp,
+              color: Colors.white,
+              size: 18,
+            ),
+            onPressed: () => _scannerController.switchCamera(),
+          ),
+        ],
       ),
       body: Stack(
         alignment: Alignment.center,
         children: [
           // --- Câmera ---
           MobileScanner(
-            controller: _scannerController, // Passa o controller configurado
-            onDetect: _handleQrCodeDetected, // Função de callback
-            // REMOVIDO: O parâmetro controllerOptions não existe aqui
-            // controllerOptions: const MobileScannerControllerOptions(...),
-            scanWindow: Rect.fromCenter(
-              // Área de scan (mantida)
-              center: MediaQuery.of(context).size.center(Offset.zero) * 0.5,
-              width: MediaQuery.of(context).size.width * 0.7,
-              height: MediaQuery.of(context).size.width * 0.7,
-            ),
+            controller: _scannerController,
+            onDetect: _handleQrCodeDetected,
             errorBuilder: (context, error, child) {
               // Tratamento de erro da câmera (mantido)
               print("Camera Error: $error");
@@ -329,8 +299,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
               );
             },
           ),
-
-          // --- Borda Visual (mantida) ---
           Container(
             width: MediaQuery.of(context).size.width * 0.7 + 6,
             height: MediaQuery.of(context).size.width * 0.7 + 6,
@@ -345,8 +313,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-
-          // --- Overlay de Processamento (mantido) ---
           if (_isProcessing)
             Positioned.fill(
               child: Container(
@@ -366,8 +332,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 ),
               ),
             ),
-
-          // --- Mensagem de Instrução (mantida) ---
           Positioned(
             bottom: MediaQuery.of(context).size.height * 0.1,
             child: Container(
