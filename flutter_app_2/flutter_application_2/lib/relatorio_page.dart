@@ -112,12 +112,9 @@ class _RelatorioPageState extends State<RelatorioPage> {
               ),
             );
           }
-
           final registros = snapshot.data!;
-
           return Column(
             children: [
-              // Apenas a seção do ListView.builder foi modificada
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -142,7 +139,6 @@ class _RelatorioPageState extends State<RelatorioPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Cabeçalho simplificado
                             Text(
                               '$marca $modelo',
                               style: const TextStyle(
@@ -155,19 +151,16 @@ class _RelatorioPageState extends State<RelatorioPage> {
                               'Placa: ${veiculo['placa'] ?? 'Indisponível'}',
                               style: const TextStyle(color: Colors.white70),
                             ),
-
                             const SizedBox(height: 12),
-
-                            // Informações principais
                             Text(
                               'Responsável: ${user['name'] ?? 'Usuário Desconhecido'}',
                               style: const TextStyle(color: Colors.white),
                             ),
                             Text(
-                              'Período: ${_formatarData(item['prev_data_inicio'])} '
-                              '${_formatarHora(item['prev_hora_inicio'])} - '
-                              '${_formatarData(item['prev_data_final'])} '
-                              '${_formatarHora(item['prev_hora_final'])}',
+                              'Período: ${_formatarData(item['historico']['data_inicio'])} '
+                              '${_formatarHora(item['historico']['hora_inicio'])} - '
+                              '${_formatarData(item['historico']['data_final'])} '
+                              '${_formatarHora(item['historico']['hora_final'])}',
                               style: const TextStyle(color: Colors.white),
                             ),
                             Text(
