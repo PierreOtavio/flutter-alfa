@@ -27,22 +27,15 @@ class InicioSolicPage extends StatefulWidget {
 }
 
 class _InicioSolicPageState extends State<InicioSolicPage> {
-  bool isLoading = true; // Começa carregando
-  // final _secureStorage = const FlutterSecureStorage();
-  // final String _tokenKey = 'auth_token';
-
+  bool isLoading = true;
   Map<String, dynamic>? solicitacaoDetalhes;
   DateTime? dataPrevPegar, dataPrevDevolver;
   TimeOfDay? horaInicial, horaFinal;
   String? errorMessage;
-
   bool _viagemIniciada = false;
   bool _viagemFinalizada = false;
   String _situacao = 'pendente';
-
   int? _kmInicialConfirmado;
-
-  // --- CORES PARA OS ESTADOS DOS BOTÕES ---
   static const Color _buttonEnabledBgColor = Color(0xFF013A65);
   static const Color _buttonEnabledFgColor = Colors.white;
   static final Color _buttonDisabledBgColor = Color(0xFF424242);
@@ -96,13 +89,9 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
       _viagemIniciada = false;
       _viagemFinalizada = false;
       _situacao = 'pendente';
-      // Mantém isLoading = true até o fim ou erro
     });
 
     final token = await ApiService().getToken();
-    // print("Token no SharedPreferences: ${token['sharedPreferences']}");
-    // print("Token no SecureStorage: ${token['secureStorage']}");
-    // print("Status de validação: ${token['status']}");
     if (token == null) {
       if (!mounted) return;
       setState(() {
@@ -125,11 +114,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
             },
           )
           .timeout(const Duration(seconds: 20));
-
-      // if (kDebugMode) {
-      //   print("Resposta da API GET /api/solicitar/$id - Status: ${response.statusCode}");
-      // }
-
       if (!mounted) return;
 
       if (response.statusCode == 200) {
@@ -192,7 +176,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
           isLoading = false;
           errorMessage = null;
         });
-        // if (kDebugMode) { print("Estado atualizado com sucesso."); }
       } else {
         String errorMsg = 'Erro desconhecido';
         try {
@@ -520,9 +503,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
     );
   }
 
-  // >>> VERSÃO CORRIGIDA: Função _buildActionButtons com lógica para Admin dono <<<
   Widget _buildActionButtons(Map<String, dynamic>? detalhes) {
-    // Validações iniciais
     if (detalhes == null || instance == null) {
       if (kDebugMode)
         print(
@@ -531,13 +512,8 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
       return const SizedBox.shrink();
     }
 
-    // Pega ID e Cargo da instância global
     final int loggedInUserId = instance!.id;
-    // >>> IMPORTANTE: Verifique se o acesso ao ID do cargo está correto <<<
-    final int loggedInUserCargoId =
-        instance!.cargo.id; // Ou instance!.cargo_id;
-
-    // Obtém o ID do criador da solicitação
+    final int loggedInUserCargoId = instance!.cargo.id;
     final int? creatorUserId = detalhes['user']?['id'];
     if (creatorUserId == null) {
       if (kDebugMode)
@@ -548,13 +524,8 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
     }
 
     final bool isOwner = (loggedInUserId == creatorUserId);
-    List<Widget> buttonsList = []; // Lista para acumular os botões
+    List<Widget> buttonsList = [];
 
-    // if (kDebugMode) {
-    //    print("Verificando botões: LoggedInUserID: $loggedInUserId, CreatorUserID: $creatorUserId, IsOwner: $isOwner, LoggedInUserCargoID: $loggedInUserCargoId, Situação: $_situacao");
-    // }
-
-    // 1. Botão de Avaliar (Exclusivo para Admin e situação pendente)
     if (loggedInUserCargoId == 1 && _situacao == 'pendente') {
       buttonsList.add(
         ElevatedButton.icon(
@@ -575,55 +546,38 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
               return;
             }
 
-            // 2. Cria o Mapa "Wrapper" e o mapa INTERNO 'detalhes' com as chaves CORRETAS
             final Map<String, dynamic> detalhesAdaptados = {
-              // Copia outros campos que NotifyDetailsPage possa precisar de dentro dos detalhes
               'user': detalhes['user'],
               'veiculo': detalhes['veiculo'],
-              'situacao': detalhes['situacao'], // Passa a situação atual
-              'motivo': detalhes['motivo'], // Passa o motivo original
-              // >>> MAPEAMENTO DAS CHAVES DE DATA/HORA <<<
-              'data_inicio':
-                  detalhes['prev_data_inicio'], // Usa a chave esperada pela NotifyDetailsPage
-              'data_final': detalhes['prev_data_final'], // Usa a chave esperada
-              'hora_inicio':
-                  detalhes['prev_hora_inicio'], // Usa a chave esperada
-              'hora_final': detalhes['prev_hora_final'], // Usa a chave esperada
-              // Adicione aqui quaisquer outros campos do mapa 'detalhes' original
-              // que a NotifyDetailsPage possa tentar acessar dentro de ['data']['detalhes']
-              // Ex: 'id_solicitacao': detalhes['id'], // Se ela precisar do ID dentro dos detalhes também
+              'situacao': detalhes['situacao'],
+              'motivo': detalhes['motivo'],
+              'data_inicio': detalhes['prev_data_inicio'],
+              'data_final': detalhes['prev_data_final'],
+              'hora_inicio': detalhes['prev_hora_inicio'],
+              'hora_final': detalhes['prev_hora_final'],
             };
 
             final Map<String, dynamic> dadosParaNotificacao = {
               'data': {
-                'solicitacao_id':
-                    widget.solicitacaoID, // ID principal para a API
-                'detalhes':
-                    detalhesAdaptados, // Passa o mapa com chaves renomeadas
+                'solicitacao_id': widget.solicitacaoID,
+                'detalhes': detalhesAdaptados,
                 'mensagem':
-                    detalhes['motivo'] ??
-                    'Avaliar solicitação pendente.', // Mensagem principal
-                'tipo': 'solicitacao_veiculo', // Tipo
+                    detalhes['motivo'] ?? 'Avaliar solicitação pendente.',
+                'tipo': 'solicitacao_veiculo',
               },
-              // Adicione aqui o 'id' da notificação simulado se NotifyDetailsPage precisar dele no nível raiz
-              // 'id': widget.solicitacaoID.toString(),
             };
-
-            // Debug: Imprimir o mapa que será passado
             if (kDebugMode) {
               print(
                 "Dados adaptados para NotifyDetailsPage: ${jsonEncode(dadosParaNotificacao)}",
               );
             }
-
-            // 3. Navega passando o mapa adaptado
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder:
                     (context) => NotificationDetailsPage(
                       notification: dadosParaNotificacao,
-                    ), // Passa o mapa adaptado
+                    ),
               ),
             ).then((_) {
               if (kDebugMode)
@@ -648,17 +602,11 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
         ),
       );
     }
-
-    // 2. Botões de Iniciar/Finalizar (Para o DONO da solicitação, INDEPENDENTE do cargo, se situação for 'aceita')
     if (isOwner && _situacao == 'aceita') {
-      bool podeIniciar =
-          !_viagemIniciada; // Se está 'aceita' e não iniciada, pode iniciar
-      bool podeFinalizar =
-          _viagemIniciada &&
-          !_viagemFinalizada; // Se está iniciada e não finalizada, pode finalizar
+      bool podeIniciar = !_viagemIniciada;
+      bool podeFinalizar = _viagemIniciada && !_viagemFinalizada;
 
       if (podeIniciar || podeFinalizar) {
-        // Só adiciona a coluna se houver alguma ação de motorista possível
         Veiculo? veiculoParaAcao;
         if (detalhes['veiculo'] != null && detalhes['veiculo'] is Map) {
           try {
@@ -671,18 +619,15 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
         }
         final int? kmInicial = _kmInicialConfirmado;
 
-        // Adiciona espaçamento se o botão de avaliar já foi adicionado
         if (buttonsList.isNotEmpty) {
           buttonsList.add(const SizedBox(height: 12));
         }
 
-        // Adiciona a coluna com os botões de motorista
         buttonsList.add(
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Botão Iniciar
               ElevatedButton.icon(
                 icon: const Icon(Icons.qr_code_scanner, size: 20),
                 label: const Text(
@@ -716,10 +661,7 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (context) => QRCodeScannerPage(
-                                    /* Passe os parâmetros necessários aqui */
-                                  ),
+                              builder: (context) => QRCodeScannerPage(),
                             ),
                           ).then((_) {
                             getSolicByID(widget.solicitacaoID);
@@ -727,7 +669,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
                         },
               ),
               const SizedBox(height: 12),
-              // Botão Finalizar
               ElevatedButton.icon(
                 icon: const Icon(Icons.check_circle_outline, size: 20),
                 label: const Text(
@@ -797,8 +738,6 @@ class _InicioSolicPageState extends State<InicioSolicPage> {
           "Dono (User ou Admin): Situação '$_situacao' não permite ações de motorista.",
         );
     }
-
-    // Retorna os botões acumulados ou vazio
     if (buttonsList.isEmpty) {
       if (kDebugMode) print("Nenhum botão de ação aplicável.");
       return const SizedBox.shrink();

@@ -205,9 +205,12 @@ class _NotificationDetailsPageState extends State<NotificationDetailsPage> {
   Widget build(BuildContext context) {
     final data = widget.notification['data']['detalhes'];
     final motivo =
-        widget.notification['data']['detalhes']['solicitacao']['motivo'] ?? '';
+        widget.notification['data']['detalhes']['solicitacao']?['motivo'] ??
+        widget.notification['data']['detalhes']['motivo'] ??
+        'Motivo não especificado';
+    final situacao =
+        data['situacao'] ?? data['solicitacao']?['situacao'] ?? 'pendente';
     final periodo = formatarPeriodoNotificacao(data, context);
-
     final largura = MediaQuery.of(context).size.width * 0.9;
 
     return Scaffold(
@@ -228,7 +231,6 @@ class _NotificationDetailsPageState extends State<NotificationDetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Container do Motivo
                   Container(
                     margin: const EdgeInsets.only(bottom: 22),
                     padding: const EdgeInsets.all(12),
@@ -308,7 +310,7 @@ class _NotificationDetailsPageState extends State<NotificationDetailsPage> {
             const SizedBox(height: 28),
             if (_isLoading)
               const CircularProgressIndicator(color: Colors.white),
-            if (!_isLoading) ...[
+            if (situacao != 'aceita' && situacao != 'recusada') ...[
               SizedBox(
                 width: largura,
                 height: 54,
@@ -349,6 +351,18 @@ class _NotificationDetailsPageState extends State<NotificationDetailsPage> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                ),
+              ),
+            ] else ...[
+              Padding(
+                padding: EdgeInsets.only(left: 40),
+                child: Text(
+                  'Obs: Solicitação já foi $situacao, para mais informações, acesse o website.',
+                  style: TextStyle(
+                    color: Colors.yellow[700],
+                    fontSize: 17,
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
               ),
